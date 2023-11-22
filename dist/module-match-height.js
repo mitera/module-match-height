@@ -347,7 +347,7 @@ class MatchHeight {
      */
     _resetStyle($that, property) {
         if (this._validateProperty(property)) {
-            eval('$that.style.' + opts.property + ' = \'\';');
+            eval('$that.style.' + property + ' = \'\';');
             if ($that.getAttribute('style') == '') $that.removeAttribute('style');
         }
     }
