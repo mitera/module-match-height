@@ -61,13 +61,15 @@ class MatchHeight {
     _init() {
 
         var $this = this;
-        
-        $this._apply();
-        if ($this._validateProperty($this.settings.attributeName)) {
-            $this._applyDataApi($this.settings.attributeName);
-        }
-        $this._applyDataApi('data-match-height');
-        $this._applyDataApi('data-mh');
+
+        document.addEventListener("DOMContentLoaded", function() {
+            $this._apply();
+            if ($this._validateProperty($this.settings.attributeName)) {
+                $this._applyDataApi($this.settings.attributeName);
+            }
+            $this._applyDataApi('data-match-height');
+            $this._applyDataApi('data-mh');
+        });
 
         window.addEventListener("resize", function() {
             $this._apply();
