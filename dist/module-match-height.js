@@ -179,19 +179,9 @@ class MatchHeight {
             }
         }
         $elements.forEach((item) => {
-            this._resetStyle(item, opts.property);
+            eval('item.style.' + opts.property + ' = \'\';');
+            if (item.getAttribute('style') == '') item.removeAttribute('style');
         });
-    }
-
-    /*
-    *  _resetStyle
-    *  Set style property empty and remove style if empty
-    */
-    _resetStyle($el, property) {
-        if (this._validateProperty(property)) {
-            eval('$el.style.' + property + ' = \'\';');
-            if ($el.getAttribute('style') == '') $el.removeAttribute('style');
-        }
     }
 
     /*
@@ -248,7 +238,8 @@ class MatchHeight {
                 // skip apply to rows with only one item
                 if (opts.byRow && $row.length <= 1) {
                     $row.forEach(($that) => {
-                        $this._resetStyle($that, opts.property);
+                        eval('$that.style.' + opts.property + ' = \'\';');
+                        if ($that.getAttribute('style') == '') $that.removeAttribute('style');
                     })
                     return;
                 }
@@ -326,12 +317,14 @@ class MatchHeight {
                     if (opts.remove instanceof NodeList) {
                         opts.remove.forEach(($el) => {
                             if ($that === $el) {
-                                $this._resetStyle($el, opts.property);
+                                eval('$el.style.' + opts.property + ' = \'\';');
+                                if ($el.getAttribute('style') == '') $el.removeAttribute('style');
                             }
                         });
                     } else {
                         if ($that === opts.remove) {
-                            $this._resetStyle($that, opts.property);
+                            eval('$that.style.' + opts.property + ' = \'\';');
+                            if ($that.getAttribute('style') == '') $that.removeAttribute('style');
                         }
                     }
                 }
