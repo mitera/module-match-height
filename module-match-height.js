@@ -63,22 +63,31 @@ class MatchHeight {
         var $this = this;
 
         document.addEventListener("DOMContentLoaded", function() {
-            $this._apply();
-            if ($this._validateProperty($this.settings.attributeName)) {
-                $this._applyDataApi($this.settings.attributeName);
-            }
-            $this._applyDataApi('data-match-height');
-            $this._applyDataApi('data-mh');
+            $this._events();
         });
 
         window.addEventListener("resize", function() {
-            $this._apply();
-            if ($this._validateProperty($this.settings.attributeName)) {
-                $this._applyDataApi($this.settings.attributeName);
-            }
-            $this._applyDataApi('data-match-height');
-            $this._applyDataApi('data-mh');
+            $this._events();
         });
+
+        window.addEventListener("orientationchange", function() {
+            $this._events();
+        });
+    }
+
+    /**
+     * Initialize the common events
+     */
+    _events() {
+
+        var $this = this;
+
+        $this._apply();
+        if ($this._validateProperty($this.settings.attributeName)) {
+            $this._applyDataApi($this.settings.attributeName);
+        }
+        $this._applyDataApi('data-match-height');
+        $this._applyDataApi('data-mh');
     }
 
     /*
@@ -238,8 +247,7 @@ class MatchHeight {
                 // skip apply to rows with only one item
                 if (opts.byRow && $row.length <= 1) {
                     $row.forEach(($that) => {
-                        eval('$that.style.' + opts.property + ' = \'\';');
-                        if ($that.getAttribute('style') == '') $that.removeAttribute('style');
+                        $this._resetStyle($that, opts.property);
                     })
                     return;
                 }
@@ -317,14 +325,12 @@ class MatchHeight {
                     if (opts.remove instanceof NodeList) {
                         opts.remove.forEach(($el) => {
                             if ($that === $el) {
-                                eval('$el.style.' + opts.property + ' = \'\';');
-                                if ($el.getAttribute('style') == '') $el.removeAttribute('style');
+                                $this._resetStyle($el, opts.property);
                             }
                         });
                     } else {
                         if ($that === opts.remove) {
-                            eval('$that.style.' + opts.property + ' = \'\';');
-                            if ($that.getAttribute('style') == '') $that.removeAttribute('style');
+                            $this._resetStyle($that, opts.property);
                         }
                     }
                 }
@@ -332,6 +338,18 @@ class MatchHeight {
 
         });
 
+    }
+
+    /**
+     *  _resetStyle
+     * @param {Element} $that
+     * @param {String} property
+     */
+    _resetStyle($that, property) {
+        if (this._validateProperty(property)) {
+            eval('$that.style.' + opts.property + ' = \'\';');
+            if ($that.getAttribute('style') == '') $that.removeAttribute('style');
+        }
     }
 }
 
