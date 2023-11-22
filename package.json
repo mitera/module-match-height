@@ -1,0 +1,30 @@
+{
+  "name": "module-match-height",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": "Simone Miterangelis <simone@mite.it>",
+  "description": "a module responsive equal heights",
+  "main": "dist/module-match-height.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mitera/module-match-height.git"
+  },
+  "keywords": [
+    "matchHeight",
+    "equal",
+    "match",
+    "height",
+    "equalize",
+    "columns"
+  ],
+  "bugs": {
+    "url": "https://github.com/mitera/module-match-height/issues"
+  },
+  "homepage": "https://github.com/mitera/module-match-height#readme",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
