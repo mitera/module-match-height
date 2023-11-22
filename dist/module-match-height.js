@@ -39,7 +39,6 @@ class MatchHeight {
         this.settings.property = this._dashToCamel(this.settings.property);
 
         this._init();
-        this._events();
     }
 
     /**
@@ -60,24 +59,25 @@ class MatchHeight {
      * Initialize the application
      */
     _init() {
-        this._apply();
-        if (this._validateProperty(this.settings.attributeName)) {
-            this._applyDataApi(this.settings.attributeName);
-        }
-        this._applyDataApi('data-match-height');
-        this._applyDataApi('data-mh');
-    }
 
-    /**
-     * Events listener
-     */
-    _events() {
         var $this = this;
-        document.addEventListener("resize", function() {
-            $this._init();
+
+        document.addEventListener("DOMContentLoaded", function() {
+            $this._apply();
+            if ($this._validateProperty($this.settings.attributeName)) {
+                $this._applyDataApi($this.settings.attributeName);
+            }
+            $this._applyDataApi('data-match-height');
+            $this._applyDataApi('data-mh');
         });
-        window.addEventListener("orientationchange", function() {
-            $this._init();
+
+        window.addEventListener("resize", function() {
+            $this._apply();
+            if ($this._validateProperty($this.settings.attributeName)) {
+                $this._applyDataApi($this.settings.attributeName);
+            }
+            $this._applyDataApi('data-match-height');
+            $this._applyDataApi('data-mh');
         });
     }
 
