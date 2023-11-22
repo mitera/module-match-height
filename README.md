@@ -146,10 +146,9 @@ Where `event` a event object (e.g. `load`, `resize`, `orientationchange`).
 
 Manual apply, code for JavaScript framework/library (e.g. `vue`, `react` ...).
 
-    var a = new MatchHeight(container, {elements: '.item'});
-	a._apply();
-    a._applyDataApi('data-match-height');
-    a._applyDataApi('data-mh');
+    new MatchHeight(container, {elements: '.item'})._apply();
+	new MatchHeight(container, {elements: '.item'})._applyDataApi('data-match-height');
+    new MatchHeight(container, {elements: '.item'})._applyDataApi('data-mh');
 
 Use the apply function directly if you wish to avoid the automatic update functionality.
 
