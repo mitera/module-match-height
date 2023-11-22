@@ -238,9 +238,8 @@ class MatchHeight {
                 // skip apply to rows with only one item
                 if (opts.byRow && $row.length <= 1) {
                     $row.forEach(($that) => {
-                        var display = $that.style.display;
-                        if (display) $that.style.display = display;
                         eval('$that.style.' + opts.property + ' = \'\';');
+                        if ($that.getAttribute('style') == '') $that.removeAttribute('style');
                     })
                     return;
                 }
