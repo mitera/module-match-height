@@ -189,7 +189,7 @@ You should ensure that there are no transitions or other animations that will de
         name: 'Example',
         data: function () {
             return {
-                matchHeight: new MatchHeight(document.body, {{elements: '.item p'})
+                matchHeight: new MatchHeight(document.body, {elements: '.item p'})
             }
         },
         beforeUnmount() {
