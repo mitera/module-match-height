@@ -23,7 +23,8 @@ class MatchHeight {
             attributeName: null,
             attributeValue: null,
             property: 'height',
-            remove: null
+            remove: null,
+            events: true
         }
 
         if (settings != null) {
@@ -38,7 +39,12 @@ class MatchHeight {
 
         this.settings.property = this._dashToCamel(this.settings.property);
 
-        this._init();
+        if (this.settings.events) {
+            var $this = this;
+            var events = function(){ $this._events($this); };
+            this.bind = events;
+            this._init();
+        }
     }
 
     /**
@@ -60,27 +66,29 @@ class MatchHeight {
      */
     _init() {
 
-        var $this = this;
+        window.addEventListener("DOMContentLoaded", this.bind, true);
 
-        document.addEventListener("DOMContentLoaded", function() {
-            $this._events();
-        });
+        window.addEventListener("resize", this.bind, true);
 
-        window.addEventListener("resize", function() {
-            $this._events();
-        });
+        window.addEventListener("orientationchange", this.bind, true);
+    }
 
-        window.addEventListener("orientationchange", function() {
-            $this._events();
-        });
+    /**
+     * Unbind events
+     */
+    _unbind() {
+
+        window.removeEventListener("DOMContentLoaded", this.bind, true);
+
+        window.removeEventListener("resize", this.bind, true);
+
+        window.removeEventListener("orientationchange", this.bind, true);
     }
 
     /**
      * Initialize the common events
      */
-    _events() {
-
-        var $this = this;
+    _events($this) {
 
         $this._apply();
         if ($this._validateProperty($this.settings.attributeName)) {
