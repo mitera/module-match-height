@@ -207,17 +207,13 @@ You should ensure that there are no transitions or other animations that will de
 
     import MatchHeight from 'vanilla-match-height';
     class MyComponent extends Component {
-
         matchHeight = new MatchHeight(document.body, {elements: '.item p'});
-        
         componentDidMount() {
             this.matchHeight._apply();
         }
-        
         componentWillUnmount() {
             this.matchHeight._unbind();
         }
-        
         render() {
             return (
                 ...
