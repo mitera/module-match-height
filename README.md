@@ -158,8 +158,6 @@ Manual apply, code for JavaScript framework/library (e.g. `vue`, `react` ...).
     el._applyDataApi('data-match-height');
     el._applyDataApi('data-mh');
 
-Use the apply function directly if you wish to avoid the automatic update functionality.
-
 #### Remove match height from elements
 
 Reset inline style property
