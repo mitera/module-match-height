@@ -184,24 +184,46 @@ You should ensure that there are no transitions or other animations that will de
 
 ### Vue3 Example:
 
-    import 'vanilla-match-height'
+    import MatchHeight from 'vanilla-match-height';
     export default {
         name: 'Example',
         data: function () {
             return {
-                matchHeight: new MatchHeight(document.body, {elements: '.item p'})
+                matchHeight: new MatchHeight(document.body, {elements: '.item p'});
             }
         },
         beforeUnmount() {
             this.matchHeight._unbind();
         },
         mounted() {
-            this.matchHeight._apply()
+            this.matchHeight._apply();
         },
         methods: {
             reMatch() {
-                this.matchHeight._apply()
+                this.matchHeight._apply();
             }
+        }
+    }
+
+### React Example:
+
+    import MatchHeight from 'vanilla-match-height';
+    class MyComponent extends Component {
+
+        matchHeight = new MatchHeight(document.body, {elements: '.item p'});
+        
+        componentDidMount() {
+            this.matchHeight._apply();
+        }
+        
+        componentWillUnmount() {
+            this.matchHeight._unbind();
+        }
+        
+        render() {
+            return (
+                ...
+            );
         }
     }
 
