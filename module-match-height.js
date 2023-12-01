@@ -91,7 +91,9 @@
         }
 
         /**
+         * _events
          * Initialize the common events
+         * @param {MatchHeight} $this
          */
         _events($this) {
 
@@ -103,10 +105,11 @@
             $this._applyDataApi('data-mh');
         }
 
-        /*
-        *  _validateProperty
-        *  handle plugin options
-        */
+        /**
+         * _validateProperty
+         * handle plugin options
+         * @param {String} value
+         */
         _validateProperty(value) {
             // parse value and convert NaN to 0
             return String(value)
@@ -116,20 +119,22 @@
                 );
         }
 
-        /*
-        *  _parseOptions
-        *  handle plugin options
-        */
+        /**
+         * _parse
+         * handle plugin options
+         * @param {String} value
+         */
         _parse(value) {
             // parse value and convert NaN to 0
             return parseFloat(value) || 0;
         }
 
-        /*
-        *  _rows
-        *  utility function returns array of selections representing each row
-        *  (as displayed after float wrapping applied by browser)
-        */
+        /**
+         * _rows
+         * utility function returns array of selections representing each row
+         * (as displayed after float wrapping applied by browser)
+         * @param {Array} elements
+         */
         _rows(elements) {
             var $this = this;
             var tolerance = 1,
@@ -160,20 +165,22 @@
             return listRows;
         }
 
-        /*
-        *  _dashToCamel
-        *  utility function for transform css property dash to camel
-        */
+        /**
+         * _dashToCamel
+         * utility function for transform css property dash to camel
+         * @param {String} input
+         */
         _dashToCamel(input) {
             return input.toLowerCase().replace(/-(.)/g, function(match, group1) {
                 return group1.toUpperCase();
             });
         }
 
-        /*
-          *  _applyDataApi
-          *  applies matchHeight to all elements with a data-match-height attribute
-        */
+        /**
+         * _applyDataApi
+         * applies matchHeight to all elements with a data-match-height attribute
+         * @param {String} property
+         */
         _applyDataApi(property) {
             var $this = this;
 
@@ -186,10 +193,10 @@
             });
         }
 
-        /*
-        *  _remove
-        *  remove matchHeight to given elements
-        */
+        /**
+         *  _remove
+         *  remove matchHeight to given elements
+         */
         _remove() {
             var $elements = []
             var opts = this.settings;
@@ -206,10 +213,10 @@
             });
         }
 
-        /*
-        *  _apply
-        *  apply matchHeight to given elements
-        */
+        /**
+         *  _apply
+         *  apply matchHeight to given elements
+         */
         _apply() {
 
             var $this = this;
