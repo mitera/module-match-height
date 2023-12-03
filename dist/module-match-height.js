@@ -47,7 +47,7 @@
 
             if (this.settings.events) {
                 var $this = this;
-                this.bind = function(){ $this._events($this); };
+                this.bind = function(){ $this._applyAll($this); };
                 this._init();
             }
         }
@@ -91,11 +91,15 @@
         }
 
         /**
-         * _events
+         * _applyAll
          * Initialize the common events
          * @param {MatchHeight} $this
          */
-        _events($this) {
+        _applyAll($this) {
+
+            if ($this == null) {
+                $this = this;
+            }
 
             $this._apply();
             if ($this._validateProperty($this.settings.attributeName)) {
