@@ -261,7 +261,7 @@
                     // iterate the row and find the max height
                     $row.forEach(($that) => {
                         var style = $that.getAttribute('style') || '',
-                            display = $that.style.display;
+                            display = window.getComputedStyle($that).getPropertyValue('display');
 
                         // temporarily force a usable display value
                         if (display && (display !== 'inline-block' && display !== 'flex' && display !== 'inline-flex')) {
