@@ -48,6 +48,7 @@
             if (this.settings.events) {
                 var $this = this;
                 this.bind = function(){ $this._applyAll($this); };
+                window.addEventListener("DOMContentLoaded", this.bind, { once: true });
                 this._init();
             }
         }
@@ -71,8 +72,6 @@
          */
         _init() {
 
-            window.addEventListener("DOMContentLoaded", this.bind, true);
-
             window.addEventListener("resize", this.bind, true);
 
             window.addEventListener("orientationchange", this.bind, true);
@@ -82,8 +81,6 @@
          * Unbind events
          */
         _unbind() {
-
-            window.removeEventListener("DOMContentLoaded", this.bind, true);
 
             window.removeEventListener("resize", this.bind, true);
 
@@ -149,17 +146,15 @@
             // group elements by their top position
             elements.forEach(($that) => {
 
-                var top = $that.getBoundingClientRect().top - $this._parse($that.style.marginTop);
+                var top = $that.getBoundingClientRect().top - $this._parse(window.getComputedStyle($that).getPropertyValue('margin-top'));
 
                 // if the row top is the same, add to the row group
                 if (lastTop != null && Math.floor(Math.abs(lastTop - top)) >= tolerance) {
                     listRows.push(rows);
                     rows = [];
                     lastTop = null;
-                    rows.push($that);
-                } else {
-                    rows.push($that);
                 }
+                rows.push($that);
 
                 // keep track of the last row top
                 lastTop = top;
@@ -240,7 +235,7 @@
 
                 // must first force an arbitrary equal height so floating elements break evenly
                 $elements.forEach(($that) => {
-                    var display = $that.style.display;
+                    var display = window.getComputedStyle($that).getPropertyValue('display');
 
                     // temporarily force a usable display value
                     if (display && (display !== 'inline-block' && display !== 'flex' && display !== 'inline-flex')) {
@@ -335,8 +330,10 @@
                     }
 
                     // handle padding and border correctly (required when not using border-box)
-                    verticalPadding += $this._parse($that.style.borderTopWidth) + $this._parse($that.style.borderBottomWidth);
-                    verticalPadding += $this._parse($that.style.paddingTop) + $this._parse($that.style.paddingBottom);
+                    verticalPadding = $this._parse(window.getComputedStyle($that).getPropertyValue('padding-top')) +
+                        $this._parse(window.getComputedStyle($that).getPropertyValue('padding-bottom')) +
+                        $this._parse(window.getComputedStyle($that).getPropertyValue('border-top-width')) +
+                        $this._parse(window.getComputedStyle($that).getPropertyValue('border-bottom-width'));
 
                     // set the height (accounting for padding and border)
                     eval('$that.style.' + opts.property + ' = \'' + (targetHeight - verticalPadding) + 'px\'');
