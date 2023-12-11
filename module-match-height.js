@@ -43,8 +43,6 @@
                 this.settings.property = 'height';
             }
 
-            this.settings.property = this._dashToCamel(this.settings.property);
-
             if (this.settings.events) {
                 var $this = this;
                 this.bind = function(){ $this._applyAll($this); };
@@ -165,17 +163,6 @@
         }
 
         /**
-         * _dashToCamel
-         * utility function for transform css property dash to camel
-         * @param {String} input
-         */
-        _dashToCamel(input) {
-            return input.toLowerCase().replace(/-(.)/g, function(match, group1) {
-                return group1.toUpperCase();
-            });
-        }
-
-        /**
          * _applyDataApi
          * applies matchHeight to all elements with a data-match-height attribute
          * @param {String} property
@@ -207,7 +194,7 @@
                 }
             }
             $elements.forEach((item) => {
-                eval('item.style.' + opts.property + ' = \'\';');
+                item.style.setProperty(opts.property, '');
                 if (item.getAttribute('style') === '') item.removeAttribute('style');
             });
         }
@@ -309,7 +296,7 @@
                         if (style) {
                             $that.setAttribute('style', style);
                         } else {
-                            $that.style.display = '';
+                            $that.style.setProperty('display', '');
                         }
 
                         if ($that.getAttribute('style') === '') $that.removeAttribute('style');
@@ -336,10 +323,10 @@
                         $this._parse(window.getComputedStyle($that).getPropertyValue('border-bottom-width'));
 
                     // set the height (accounting for padding and border)
-                    eval('$that.style.' + opts.property + ' = \'' + (targetHeight - verticalPadding) + 'px\'');
+                    $that.style.setProperty(opts.property,  (targetHeight - verticalPadding) + 'px');
 
                     if ($that.getBoundingClientRect().height < targetHeight) {
-                        eval('$that.style.' + opts.property + ' = \'' + targetHeight + 'px\'');
+                        $that.style.setProperty(opts.property,  targetHeight + 'px');
                     }
 
                     if (opts.remove) {
@@ -368,7 +355,7 @@
          */
         _resetStyle($that, property) {
             if (this._validateProperty(property)) {
-                eval('$that.style.' + property + ' = \'\';');
+                $that.style.setProperty(property,  '');
                 if ($that.getAttribute('style') === '') $that.removeAttribute('style');
             }
         }
