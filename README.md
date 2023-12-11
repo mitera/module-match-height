@@ -1,5 +1,12 @@
 # module-match-height.js #
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-JavaScript-%230074c1.svg)](http://www.typescriptlang.org/)
+[![Socket Badge](https://socket.dev/api/badge/npm/package/module-match-height)](https://socket.dev/npm/package/module-match-height)
+[![npm](https://img.shields.io/npm/v/module-match-height.svg?logo=npm&logoColor=fff&label=npm)](https://www.npmjs.com/package/module-match-height)
+
 ## *Inspired by:* jquery-match-height
+
 > *matchHeight:* makes the height of all selected elements exactly equal
 
 [Demo](#demo) - [Features](#features) - [Install](#install) - [Usage](#usage) - [Options](#options) - [Data API](#data-api)  
@@ -185,7 +192,7 @@ You should ensure that there are no transitions or other animations that will de
 
 ### Vue3 Example:
 
-    import MatchHeight from 'vanilla-match-height';
+    import MatchHeight from 'module-match-height';
     export default {
         name: 'Example',
         data: function () {
@@ -208,7 +215,7 @@ You should ensure that there are no transitions or other animations that will de
 
 ### React Example:
 
-    import MatchHeight from 'vanilla-match-height';
+    import MatchHeight from 'module-match-height';
     class MyComponent extends Component {
         matchHeight = new MatchHeight(document.body, {elements: '.item p'});
         componentDidMount() {
