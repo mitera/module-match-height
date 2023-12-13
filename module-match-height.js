@@ -30,7 +30,8 @@
                 attributeValue: null,
                 property: 'height',
                 remove: null,
-                events: true
+                events: true,
+                throttle: 80
             }
 
             if (settings != null) {
@@ -47,6 +48,7 @@
                 var $this = this;
                 this.bind = function(){ $this._applyAll($this); };
                 window.addEventListener("DOMContentLoaded", this.bind, { once: true });
+                if (this.settings.throttle > 0) this.bind = this._throttle(this.bind, this.settings.throttle);
                 this._init();
             }
         }
@@ -83,6 +85,30 @@
             window.removeEventListener("resize", this.bind, true);
 
             window.removeEventListener("orientationchange", this.bind, true);
+        }
+
+        /**
+         * _throttle
+         * Throttle updates
+         * @param {function} fn
+         * @param {int} threshold
+         */
+        _throttle(fn, threshold) {
+            let last, deferTimer;
+            return function () {
+                const now = Date.now();
+                if (last && now < last + threshold) {
+                    clearTimeout(deferTimer);
+                    deferTimer = setTimeout(function () {
+                        last = now;
+                        fn();
+                    }, threshold);
+                }
+                else {
+                    last = now;
+                    fn();
+                }
+            };
         }
 
         /**
