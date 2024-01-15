@@ -1,12 +1,11 @@
 {
-  "files": ["src/module-match-height.ts"],
   "compilerOptions": {
     "baseUrl": "src",
     "outDir": "./dist",
     "declaration": true,
     "target": "es2017",
     "strict": true,
-    "removeComments": false,
+    "removeComments": true,
     "experimentalDecorators": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
