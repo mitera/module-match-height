@@ -4,7 +4,7 @@
  * License: MIT
  */
 
-import {Settings, IMatchHeight} from "./settings";
+import {Settings, IMatchHeight} from "./types";
 
 class MatchHeight implements IMatchHeight {
     private wrapEl: HTMLElement;
