@@ -5,6 +5,7 @@
   "author": "Simone Miterangelis <simone@mite.it>",
   "description": "a module responsive equal heights",
   "main": "dist/module-match-height.js",
+  "types": "dist/module-match-height.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mitera/module-match-height.git"
@@ -26,5 +27,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
   }
 }
