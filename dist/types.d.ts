@@ -1,14 +1,14 @@
 import MatchHeight from "./module-match-height";
 interface Settings {
     elements?: string | null;
-    byRow: boolean | null;
+    byRow?: boolean | null;
     target?: HTMLElement | null;
     attributeName?: string | null;
     attributeValue?: string | null;
     property?: string | null;
     remove?: HTMLElement | null;
-    events: boolean | null;
-    throttle: number | null;
+    events?: boolean | null;
+    throttle?: number | null;
 }
 interface IMatchHeight {
     _merge(o1: Settings, o2: Settings): Settings;
