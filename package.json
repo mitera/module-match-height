@@ -26,9 +26,14 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "rollup --config --watch",
+    "build": "rollup --config && terser dist/module-match-height.js -o dist/module-match-height.min.js --comments '/^!/'"
   },
   "devDependencies": {
-    "typescript": "^5.3.3"
+    "@rollup/plugin-typescript": "^11.1.5",
+    "rollup": "^4.1.4",
+    "terser": "^5.22.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2"
   }
 }

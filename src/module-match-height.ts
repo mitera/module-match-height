@@ -1,9 +1,3 @@
-/**
- * vanilla-match-height v1.2.1 by @mitera
- * Simone Miterangelis <simone@mite.it>
- * License: MIT
- */
-
 import {Settings, IMatchHeight} from "./types";
 
 class MatchHeight implements IMatchHeight {
