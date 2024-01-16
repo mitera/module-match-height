@@ -37,7 +37,7 @@ class MatchHeight implements IMatchHeight {
         if (this.settings.events) {
 
             var $this = this;
-            this.update = this._applyAll($this);
+            this.update = function(){ $this._applyAll($this); };
 
             if (document.readyState !== 'loading') {
                 this._applyAll($this);
