@@ -44,6 +44,10 @@ Use this library to match height of internal elements, like title or text of tea
 
 ### Install
 
+CDN via jsDelivr
+
+    <script src="https://cdn.jsdelivr.net/npm/module-match-height@latest/dist/module-match-height.min.js" type="text/javascript"></script>
+
 Download [module-match-height.js](https://github.com/mitera/module-match-height/blob/master/module-match-height.js) and include the script in your HTML file:
 
 	<script src="module-match-height.js" type="text/javascript"></script>
@@ -81,7 +85,7 @@ Also see the [Data API](#data-api) below for a simple, alternative inline usage.
 The default `options` are:
 
     {
-        elements: '',
+        elements: null,
         byRow: true,
         property: 'height',
         target: null,
@@ -99,7 +103,7 @@ Where:
 - `target` is an optional element to use instead of the element with maximum height
 - `remove` is an optional element/s to excluded
 - `attributeName` is an optional for use custom attribute
-- `events` is an optional for enable default events, default is `true`
+- `events` is `true` or `false` to enable default events
 - `throttle` milliseconds to executed resize event, default is `80`
 
 ### Data API
