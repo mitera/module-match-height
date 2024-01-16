@@ -29,9 +29,10 @@
 	            this.settings.property = 'height';
 	        }
 	        if (this.settings.events) {
-	            this.update = this._applyAll();
+	            var $this = this;
+	            this.update = this._applyAll($this);
 	            if (document.readyState !== 'loading') {
-	                this._applyAll();
+	                this._applyAll($this);
 	            }
 	            else {
 	                document.addEventListener('DOMContentLoaded', this.update, { once: true });
@@ -75,13 +76,16 @@
 	            }
 	        };
 	    }
-	    _applyAll() {
-	        this._apply();
-	        if (this.settings.attributeName && this._validateProperty(this.settings.attributeName)) {
-	            this._applyDataApi(this.settings.attributeName);
+	    _applyAll($this) {
+	        if (!$this) {
+	            $this = this;
 	        }
-	        this._applyDataApi('data-match-height');
-	        this._applyDataApi('data-mh');
+	        $this._apply();
+	        if ($this.settings.attributeName && $this._validateProperty($this.settings.attributeName)) {
+	            $this._applyDataApi($this.settings.attributeName);
+	        }
+	        $this._applyDataApi('data-match-height');
+	        $this._applyDataApi('data-mh');
 	    }
 	    _validateProperty(value) {
 	        return String(value)

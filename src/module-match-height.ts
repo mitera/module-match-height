@@ -36,10 +36,11 @@ class MatchHeight implements IMatchHeight {
 
         if (this.settings.events) {
 
-            this.update = this._applyAll();
+            var $this = this;
+            this.update = this._applyAll($this);
 
             if (document.readyState !== 'loading') {
-                this._applyAll();
+                this._applyAll($this);
             } else {
                 document.addEventListener( 'DOMContentLoaded', this.update, { once: true } );
             }
@@ -116,14 +117,18 @@ class MatchHeight implements IMatchHeight {
      * Initialize the common events
      * @param {MatchHeight} $this
      */
-    _applyAll() {
+    _applyAll($this: MatchHeight) {
 
-        this._apply();
-        if (this.settings.attributeName && this._validateProperty(this.settings.attributeName)) {
-            this._applyDataApi(this.settings.attributeName);
+        if (!$this) {
+            $this = this;
         }
-        this._applyDataApi('data-match-height');
-        this._applyDataApi('data-mh');
+
+        $this._apply();
+        if ($this.settings.attributeName && $this._validateProperty($this.settings.attributeName)) {
+            $this._applyDataApi($this.settings.attributeName);
+        }
+        $this._applyDataApi('data-match-height');
+        $this._applyDataApi('data-mh');
     }
 
     /**
