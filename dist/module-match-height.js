@@ -1,6 +1,6 @@
 /*!
  * @author Simone Miterangelis <simone@mite.it>
- * vanilla-match-height v1.0.0 by @mitera
+ * module-match-height v1.0.0 by @mitera
  * https://github.com/mitera/module-match-height
  * Released under the MIT License.
  */
