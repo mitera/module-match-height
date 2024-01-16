@@ -17,7 +17,7 @@
 
 ### Demo
 
-See the [module-match-height.js demo](https://github.com/mitera/module-match-height/archive/refs/heads/master.zip).
+See the [module-match-height.js demo](https://codepen.io/mitera/pen/XWGpLRL).
 
 [![module-match-height.js screenshot](https://github.com/mitera/module-match-height/blob/master/module-match-height.jpg)](https://github.com/mitera/module-match-height/archive/refs/heads/master.zip)
 
