@@ -155,7 +155,7 @@ class MatchHeight implements IMatchHeight {
      * (as displayed after float wrapping applied by browser)
      * @param {Array} elements
      */
-    _rows(elements: [HTMLElement]) {
+    _rows(elements: HTMLElement[]) {
         var $this = this;
         var tolerance: number = 1,
             lastTop: number = -1,
@@ -257,7 +257,6 @@ class MatchHeight implements IMatchHeight {
             });
 
             // get the array of rows (based on element top position)
-            // @ts-ignore
             rows = this._rows($elements);
 
             // revert original inline styles

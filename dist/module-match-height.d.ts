@@ -11,7 +11,7 @@ declare class MatchHeight implements IMatchHeight {
     _applyAll(): void;
     _validateProperty(value: string): RegExpMatchArray | null;
     _parse(value: string): number;
-    _rows(elements: [HTMLElement]): HTMLElement[][];
+    _rows(elements: HTMLElement[]): HTMLElement[][];
     _applyDataApi(property: string): void;
     _remove(): void;
     _apply(): void;
