@@ -11,7 +11,6 @@ interface Settings {
     throttle: number | null;
 }
 interface IMatchHeight {
-    _bind(): void;
     _merge(o1: Settings, o2: Settings): Settings;
     _init(): void;
     _unbind(): void;

@@ -3,6 +3,7 @@ import {Settings, IMatchHeight} from "./types";
 class MatchHeight implements IMatchHeight {
     private wrapEl: HTMLElement;
     private settings: Settings;
+    private update: any;
 
     /**
      * matchHeight
@@ -34,23 +35,20 @@ class MatchHeight implements IMatchHeight {
         }
 
         if (this.settings.events) {
+
+            this.update = this._applyAll();
+
             if (document.readyState !== 'loading') {
-                this._bind();
+                this._applyAll();
             } else {
-                document.addEventListener( 'DOMContentLoaded', this._bind, { once: true } );
+                document.addEventListener( 'DOMContentLoaded', this.update, { once: true } );
             }
 
-            if (this.settings.throttle && this.settings.throttle > 0) this._bind = this._throttle(this._bind, this.settings.throttle);
+            if (this.settings.throttle && this.settings.throttle > 0) {
+                this.update = this._throttle( this.update, this.settings.throttle );
+            }
             this._init();
         }
-    }
-
-    /**
-     * bind events
-     */
-    _bind() {
-        var $this = this;
-        $this._applyAll($this);
     }
 
     /**
@@ -58,9 +56,9 @@ class MatchHeight implements IMatchHeight {
      */
     _init() {
 
-        window.addEventListener("resize", this._bind);
+        window.addEventListener("resize", this.update);
 
-        window.addEventListener("orientationchange", this._bind);
+        window.addEventListener("orientationchange", this.update);
     }
 
     /**
@@ -68,9 +66,9 @@ class MatchHeight implements IMatchHeight {
      */
     _unbind() {
 
-        window.removeEventListener("resize", this._bind);
+        window.removeEventListener("resize", this.update);
 
-        window.removeEventListener("orientationchange", this._bind);
+        window.removeEventListener("orientationchange", this.update);
     }
 
     /**
@@ -118,18 +116,14 @@ class MatchHeight implements IMatchHeight {
      * Initialize the common events
      * @param {MatchHeight} $this
      */
-    _applyAll($this: MatchHeight) {
+    _applyAll() {
 
-        if ($this == null) {
-            $this = this;
+        this._apply();
+        if (this.settings.attributeName && this._validateProperty(this.settings.attributeName)) {
+            this._applyDataApi(this.settings.attributeName);
         }
-
-        $this._apply();
-        if ($this.settings.attributeName && $this._validateProperty($this.settings.attributeName)) {
-            $this._applyDataApi($this.settings.attributeName);
-        }
-        $this._applyDataApi('data-match-height');
-        $this._applyDataApi('data-mh');
+        this._applyDataApi('data-match-height');
+        this._applyDataApi('data-mh');
     }
 
     /**

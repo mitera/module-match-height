@@ -1,9 +1,12 @@
 # module-match-height.js #
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-JavaScript-%230074c1.svg)](http://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
 [![Socket Badge](https://socket.dev/api/badge/npm/package/module-match-height)](https://socket.dev/npm/package/module-match-height)
+[![jsdelivr](https://data.jsdelivr.com/v1/package/npm/module-match-height/badge)](https://www.jsdelivr.com/package/npm/module-match-height)
 [![npm](https://img.shields.io/npm/v/module-match-height.svg?logo=npm&logoColor=fff&label=npm)](https://www.npmjs.com/package/module-match-height)
+[![npm downloads](https://img.shields.io/npm/dm/module-match-height.svg?style=flat-square)](https://www.npmjs.com/package/module-match-height)
+[![yarn](https://img.shields.io/npm/v/module-match-height.svg?logo=yarn&logoColor=fff&label=yarn)](https://yarnpkg.com/package?name=module-match-height)
 
 ## *Inspired by:* jquery-match-height
 

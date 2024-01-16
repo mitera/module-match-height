@@ -29,28 +29,26 @@
 	            this.settings.property = 'height';
 	        }
 	        if (this.settings.events) {
+	            this.update = this._applyAll();
 	            if (document.readyState !== 'loading') {
-	                this._bind();
+	                this._applyAll();
 	            }
 	            else {
-	                document.addEventListener('DOMContentLoaded', this._bind, { once: true });
+	                document.addEventListener('DOMContentLoaded', this.update, { once: true });
 	            }
-	            if (this.settings.throttle && this.settings.throttle > 0)
-	                this._bind = this._throttle(this._bind, this.settings.throttle);
+	            if (this.settings.throttle && this.settings.throttle > 0) {
+	                this.update = this._throttle(this.update, this.settings.throttle);
+	            }
 	            this._init();
 	        }
 	    }
-	    _bind() {
-	        var $this = this;
-	        $this._applyAll($this);
-	    }
 	    _init() {
-	        window.addEventListener("resize", this._bind);
-	        window.addEventListener("orientationchange", this._bind);
+	        window.addEventListener("resize", this.update);
+	        window.addEventListener("orientationchange", this.update);
 	    }
 	    _unbind() {
-	        window.removeEventListener("resize", this._bind);
-	        window.removeEventListener("orientationchange", this._bind);
+	        window.removeEventListener("resize", this.update);
+	        window.removeEventListener("orientationchange", this.update);
 	    }
 	    _merge(o1, o2) {
 	        if (o1 != null) {
@@ -77,16 +75,13 @@
 	            }
 	        };
 	    }
-	    _applyAll($this) {
-	        if ($this == null) {
-	            $this = this;
+	    _applyAll() {
+	        this._apply();
+	        if (this.settings.attributeName && this._validateProperty(this.settings.attributeName)) {
+	            this._applyDataApi(this.settings.attributeName);
 	        }
-	        $this._apply();
-	        if ($this.settings.attributeName && $this._validateProperty($this.settings.attributeName)) {
-	            $this._applyDataApi($this.settings.attributeName);
-	        }
-	        $this._applyDataApi('data-match-height');
-	        $this._applyDataApi('data-mh');
+	        this._applyDataApi('data-match-height');
+	        this._applyDataApi('data-mh');
 	    }
 	    _validateProperty(value) {
 	        return String(value)
