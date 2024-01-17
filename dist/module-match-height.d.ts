@@ -3,7 +3,7 @@ declare class MatchHeight implements IMatchHeight {
     private wrapEl;
     private settings;
     private update;
-    constructor(wrapEl: HTMLElement, settings: Settings);
+    constructor(wrapEl: HTMLElement, settings?: Settings);
     _init(): void;
     _unbind(): void;
     _merge(o1: any, o2: any): any;

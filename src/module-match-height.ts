@@ -12,7 +12,7 @@ class MatchHeight implements IMatchHeight {
      * @param {Settings} settings
      * constructor
      */
-    constructor(wrapEl: HTMLElement, settings: Settings) {
+    constructor(wrapEl: HTMLElement, settings?: Settings) {
         this.wrapEl = wrapEl;
 
         // Default settings
