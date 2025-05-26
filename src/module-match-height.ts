@@ -79,7 +79,7 @@ export default class MatchHeight implements IMatchHeight {
      */
     _merge(o1: any, o2: any) {
         if (o1 != null) {
-            for (var i in o1) {
+            for (let i in o1) {
                 o2[i] = o1[i];
             }
         }
@@ -161,7 +161,7 @@ export default class MatchHeight implements IMatchHeight {
      * @param {Array} elements
      */
     _rows(elements: HTMLElement[]) {
-        var tolerance: number = 1,
+        let tolerance: number = 1,
             lastTop: number = -1,
             listRows: HTMLElement[][] = [],
             rows: HTMLElement[] = [];
@@ -169,7 +169,7 @@ export default class MatchHeight implements IMatchHeight {
         // group elements by their top position
         elements.forEach(($that) => {
 
-            var top = $that.getBoundingClientRect().top - this._parse(window.getComputedStyle($that).getPropertyValue('margin-top'));
+            let top = $that.getBoundingClientRect().top - this._parse(window.getComputedStyle($that).getPropertyValue('margin-top'));
 
             // if the row top is the same, add to the row group
             if (lastTop != -1 && Math.floor(Math.abs(lastTop - top)) >= tolerance) {
@@ -193,10 +193,10 @@ export default class MatchHeight implements IMatchHeight {
      * @param {String} property
      */
     _applyDataApi(property: string) {
-        var $row: HTMLElement[] = Array.from(this.wrapEl.querySelectorAll('[' + property + ']'));
+        let $row: HTMLElement[] = Array.from(this.wrapEl.querySelectorAll('[' + property + ']'));
         // generate groups by their groupId set by elements using data-match-height
         $row.forEach(($el) => {
-            var groupId = $el.getAttribute(property);
+            let groupId = $el.getAttribute(property);
             this.settings = this._merge({attributeName: property, attributeValue: groupId}, this.settings);
             this._apply();
         });
@@ -207,8 +207,8 @@ export default class MatchHeight implements IMatchHeight {
      *  remove matchHeight to given elements
      */
     _remove() {
-        var $elements: HTMLElement[] = []
-        var opts = this.settings;
+        let $elements: HTMLElement[] = []
+        let opts = this.settings;
         if (opts.elements) {
             $elements = Array.from(this.wrapEl.querySelectorAll(opts.elements));
         } else {
@@ -227,8 +227,8 @@ export default class MatchHeight implements IMatchHeight {
      *  apply matchHeight to given elements
      */
     _apply() {
-        var opts = this.settings;
-        var $elements: HTMLElement[] = []
+        let opts = this.settings;
+        let $elements: HTMLElement[] = []
         if (opts.elements && opts.elements.trim() != '') {
             $elements = Array.from(this.wrapEl.querySelectorAll(opts.elements));
         } else {
@@ -236,14 +236,14 @@ export default class MatchHeight implements IMatchHeight {
                 $elements = Array.from(this.wrapEl.querySelectorAll('[' + opts.attributeName + '="' + opts.attributeValue + '"]'));
             }
         }
-        var rows: HTMLElement[][] = [$elements];
+        let rows: HTMLElement[][] = [$elements];
 
         // get rows if using byRow, otherwise assume one row
         if (opts.byRow && !opts.target) {
 
             // must first force an arbitrary equal height so floating elements break evenly
             $elements.forEach(($that) => {
-                var display = window.getComputedStyle($that).getPropertyValue('display');
+                let display = window.getComputedStyle($that).getPropertyValue('display');
 
                 // temporarily force a usable display value
                 if (display && (display !== 'inline-block' && display !== 'flex' && display !== 'inline-flex')) {
@@ -268,7 +268,7 @@ export default class MatchHeight implements IMatchHeight {
         }
 
         rows.forEach(($row) => {
-            var targetHeight = 0;
+            let targetHeight = 0;
 
             if (!opts.target) {
                 // skip apply to rows with only one item
@@ -282,7 +282,7 @@ export default class MatchHeight implements IMatchHeight {
 
                 // iterate the row and find the max height
                 $row.forEach(($that) => {
-                    var style = $that.getAttribute('style') || '',
+                    let style = $that.getAttribute('style') || '',
                         display = window.getComputedStyle($that).getPropertyValue('display');
 
                     // temporarily force a usable display value
@@ -294,7 +294,7 @@ export default class MatchHeight implements IMatchHeight {
                     $that.setAttribute('style', 'display: ' + display + ';');
 
                     // find the max height (including padding, but not margin)
-                    var isTarget = true;
+                    let isTarget = true;
                     if (opts.remove) {
                         if (opts.remove instanceof NodeList) {
                             opts.remove.forEach(($el) => {
@@ -331,7 +331,7 @@ export default class MatchHeight implements IMatchHeight {
 
             // iterate the row and apply the height to all elements
             $row.forEach(($that) => {
-                var verticalPadding = 0;
+                let verticalPadding = 0;
 
                 // don't apply to a target
                 if (opts.target && $that === opts.target) {
@@ -354,7 +354,7 @@ export default class MatchHeight implements IMatchHeight {
 
                 if (opts.remove) {
                     if (opts.remove instanceof NodeList) {
-                        var removedItems = Array.from(opts.remove);
+                        let removedItems = Array.from(opts.remove);
                         removedItems.forEach(($el) => {
                             if ($that === $el && opts.property) {
                                 if ($el instanceof HTMLElement) {

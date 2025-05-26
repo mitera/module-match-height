@@ -54,7 +54,7 @@
 	    }
 	    _merge(o1, o2) {
 	        if (o1 != null) {
-	            for (var i in o1) {
+	            for (let i in o1) {
 	                o2[i] = o1[i];
 	            }
 	        }
@@ -100,9 +100,9 @@
 	        return parseFloat(value) || 0;
 	    }
 	    _rows(elements) {
-	        var tolerance = 1, lastTop = -1, listRows = [], rows = [];
+	        let tolerance = 1, lastTop = -1, listRows = [], rows = [];
 	        elements.forEach(($that) => {
-	            var top = $that.getBoundingClientRect().top - this._parse(window.getComputedStyle($that).getPropertyValue('margin-top'));
+	            let top = $that.getBoundingClientRect().top - this._parse(window.getComputedStyle($that).getPropertyValue('margin-top'));
 	            if (lastTop != -1 && Math.floor(Math.abs(lastTop - top)) >= tolerance) {
 	                listRows.push(rows);
 	                rows = [];
@@ -115,16 +115,16 @@
 	        return listRows;
 	    }
 	    _applyDataApi(property) {
-	        var $row = Array.from(this.wrapEl.querySelectorAll('[' + property + ']'));
+	        let $row = Array.from(this.wrapEl.querySelectorAll('[' + property + ']'));
 	        $row.forEach(($el) => {
-	            var groupId = $el.getAttribute(property);
+	            let groupId = $el.getAttribute(property);
 	            this.settings = this._merge({ attributeName: property, attributeValue: groupId }, this.settings);
 	            this._apply();
 	        });
 	    }
 	    _remove() {
-	        var $elements = [];
-	        var opts = this.settings;
+	        let $elements = [];
+	        let opts = this.settings;
 	        if (opts.elements) {
 	            $elements = Array.from(this.wrapEl.querySelectorAll(opts.elements));
 	        }
@@ -141,8 +141,8 @@
 	        });
 	    }
 	    _apply() {
-	        var opts = this.settings;
-	        var $elements = [];
+	        let opts = this.settings;
+	        let $elements = [];
 	        if (opts.elements && opts.elements.trim() != '') {
 	            $elements = Array.from(this.wrapEl.querySelectorAll(opts.elements));
 	        }
@@ -151,10 +151,10 @@
 	                $elements = Array.from(this.wrapEl.querySelectorAll('[' + opts.attributeName + '="' + opts.attributeValue + '"]'));
 	            }
 	        }
-	        var rows = [$elements];
+	        let rows = [$elements];
 	        if (opts.byRow && !opts.target) {
 	            $elements.forEach(($that) => {
-	                var display = window.getComputedStyle($that).getPropertyValue('display');
+	                let display = window.getComputedStyle($that).getPropertyValue('display');
 	                if (display && (display !== 'inline-block' && display !== 'flex' && display !== 'inline-flex')) {
 	                    display = 'display: block; ';
 	                }
@@ -170,7 +170,7 @@
 	            });
 	        }
 	        rows.forEach(($row) => {
-	            var targetHeight = 0;
+	            let targetHeight = 0;
 	            if (!opts.target) {
 	                if (opts.byRow && $row.length <= 1) {
 	                    $row.forEach(($that) => {
@@ -180,12 +180,12 @@
 	                    return;
 	                }
 	                $row.forEach(($that) => {
-	                    var style = $that.getAttribute('style') || '', display = window.getComputedStyle($that).getPropertyValue('display');
+	                    let style = $that.getAttribute('style') || '', display = window.getComputedStyle($that).getPropertyValue('display');
 	                    if (display && (display !== 'inline-block' && display !== 'flex' && display !== 'inline-flex')) {
 	                        display = 'block';
 	                    }
 	                    $that.setAttribute('style', 'display: ' + display + ';');
-	                    var isTarget = true;
+	                    let isTarget = true;
 	                    if (opts.remove) {
 	                        if (opts.remove instanceof NodeList) {
 	                            opts.remove.forEach(($el) => {
@@ -219,7 +219,7 @@
 	                targetHeight = opts.target.getBoundingClientRect().height;
 	            }
 	            $row.forEach(($that) => {
-	                var verticalPadding = 0;
+	                let verticalPadding = 0;
 	                if (opts.target && $that === opts.target) {
 	                    return;
 	                }
@@ -234,7 +234,7 @@
 	                }
 	                if (opts.remove) {
 	                    if (opts.remove instanceof NodeList) {
-	                        var removedItems = Array.from(opts.remove);
+	                        let removedItems = Array.from(opts.remove);
 	                        removedItems.forEach(($el) => {
 	                            if ($that === $el && opts.property) {
 	                                if ($el instanceof HTMLElement) {
