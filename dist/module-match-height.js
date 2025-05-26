@@ -1,6 +1,6 @@
 /*!
  * @author Simone Miterangelis <simone@mite.it>
- * module-match-height v1.0.1 by @mitera
+ * module-match-height v1.0.2 by @mitera
  * https://github.com/mitera/module-match-height
  * Released under the MIT License.
  */
@@ -22,17 +22,18 @@
 	            property: 'height',
 	            remove: null,
 	            events: true,
-	            throttle: 80
+	            throttle: 80,
+	            beforeUpdate: null,
+	            afterUpdate: null
 	        };
 	        this.settings = Object.assign(Object.assign({}, default_settings), settings);
 	        if (this.settings.property && !this._validateProperty(this.settings.property)) {
 	            this.settings.property = 'height';
 	        }
 	        if (this.settings.events) {
-	            var $this = this;
-	            this.update = function () { $this._applyAll($this); };
+	            this.update = this._applyAll.bind(this);
 	            if (document.readyState !== 'loading') {
-	                this._applyAll($this);
+	                this._applyAll();
 	            }
 	            else {
 	                document.addEventListener('DOMContentLoaded', this.update, { once: true });
@@ -76,16 +77,19 @@
 	            }
 	        };
 	    }
-	    _applyAll($this) {
-	        if (!$this) {
-	            $this = this;
+	    _applyAll() {
+	        if (this.settings && this.settings.beforeUpdate) {
+	            this.settings.beforeUpdate();
 	        }
-	        $this._apply();
-	        if ($this.settings.attributeName && $this._validateProperty($this.settings.attributeName)) {
-	            $this._applyDataApi($this.settings.attributeName);
+	        this._apply();
+	        if (this.settings.attributeName && this._validateProperty(this.settings.attributeName)) {
+	            this._applyDataApi(this.settings.attributeName);
 	        }
-	        $this._applyDataApi('data-match-height');
-	        $this._applyDataApi('data-mh');
+	        this._applyDataApi('data-match-height');
+	        this._applyDataApi('data-mh');
+	        if (this.settings && this.settings.afterUpdate) {
+	            this.settings.afterUpdate();
+	        }
 	    }
 	    _validateProperty(value) {
 	        return String(value)
@@ -96,10 +100,9 @@
 	        return parseFloat(value) || 0;
 	    }
 	    _rows(elements) {
-	        var $this = this;
 	        var tolerance = 1, lastTop = -1, listRows = [], rows = [];
 	        elements.forEach(($that) => {
-	            var top = $that.getBoundingClientRect().top - $this._parse(window.getComputedStyle($that).getPropertyValue('margin-top'));
+	            var top = $that.getBoundingClientRect().top - this._parse(window.getComputedStyle($that).getPropertyValue('margin-top'));
 	            if (lastTop != -1 && Math.floor(Math.abs(lastTop - top)) >= tolerance) {
 	                listRows.push(rows);
 	                rows = [];
@@ -112,12 +115,11 @@
 	        return listRows;
 	    }
 	    _applyDataApi(property) {
-	        var $this = this;
 	        var $row = Array.from(this.wrapEl.querySelectorAll('[' + property + ']'));
 	        $row.forEach(($el) => {
 	            var groupId = $el.getAttribute(property);
-	            $this.settings = $this._merge({ attributeName: property, attributeValue: groupId }, $this.settings);
-	            $this._apply();
+	            this.settings = this._merge({ attributeName: property, attributeValue: groupId }, this.settings);
+	            this._apply();
 	        });
 	    }
 	    _remove() {
@@ -139,14 +141,13 @@
 	        });
 	    }
 	    _apply() {
-	        var $this = this;
-	        var opts = $this.settings;
+	        var opts = this.settings;
 	        var $elements = [];
 	        if (opts.elements && opts.elements.trim() != '') {
 	            $elements = Array.from(this.wrapEl.querySelectorAll(opts.elements));
 	        }
 	        else {
-	            if (opts.attributeName && $this._validateProperty(opts.attributeName) && opts.attributeValue && opts.attributeValue.trim() != '') {
+	            if (opts.attributeName && this._validateProperty(opts.attributeName) && opts.attributeValue && opts.attributeValue.trim() != '') {
 	                $elements = Array.from(this.wrapEl.querySelectorAll('[' + opts.attributeName + '="' + opts.attributeValue + '"]'));
 	            }
 	        }
@@ -174,7 +175,7 @@
 	                if (opts.byRow && $row.length <= 1) {
 	                    $row.forEach(($that) => {
 	                        if (opts.property)
-	                            $this._resetStyle($that, opts.property);
+	                            this._resetStyle($that, opts.property);
 	                    });
 	                    return;
 	                }
@@ -222,10 +223,10 @@
 	                if (opts.target && $that === opts.target) {
 	                    return;
 	                }
-	                verticalPadding = $this._parse(window.getComputedStyle($that).getPropertyValue('padding-top')) +
-	                    $this._parse(window.getComputedStyle($that).getPropertyValue('padding-bottom')) +
-	                    $this._parse(window.getComputedStyle($that).getPropertyValue('border-top-width')) +
-	                    $this._parse(window.getComputedStyle($that).getPropertyValue('border-bottom-width'));
+	                verticalPadding = this._parse(window.getComputedStyle($that).getPropertyValue('padding-top')) +
+	                    this._parse(window.getComputedStyle($that).getPropertyValue('padding-bottom')) +
+	                    this._parse(window.getComputedStyle($that).getPropertyValue('border-top-width')) +
+	                    this._parse(window.getComputedStyle($that).getPropertyValue('border-bottom-width'));
 	                if (opts.property)
 	                    $that.style.setProperty(opts.property, (targetHeight - verticalPadding) + 'px');
 	                if (opts.property && $that.getBoundingClientRect().height < targetHeight) {
@@ -237,14 +238,14 @@
 	                        removedItems.forEach(($el) => {
 	                            if ($that === $el && opts.property) {
 	                                if ($el instanceof HTMLElement) {
-	                                    $this._resetStyle($el, opts.property);
+	                                    this._resetStyle($el, opts.property);
 	                                }
 	                            }
 	                        });
 	                    }
 	                    else {
 	                        if ($that === opts.remove && opts.property) {
-	                            $this._resetStyle($that, opts.property);
+	                            this._resetStyle($that, opts.property);
 	                        }
 	                    }
 	                }
@@ -254,8 +255,9 @@
 	    _resetStyle($that, property) {
 	        if (this._validateProperty(property)) {
 	            $that.style.setProperty(property, '');
-	            if ($that.getAttribute('style') === '')
+	            if ($that.getAttribute('style') === '') {
 	                $that.removeAttribute('style');
+	            }
 	        }
 	    }
 	}

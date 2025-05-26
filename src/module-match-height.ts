@@ -1,6 +1,6 @@
 import {Settings, IMatchHeight} from "./types";
 
-class MatchHeight implements IMatchHeight {
+export default class MatchHeight implements IMatchHeight {
     private wrapEl: HTMLElement;
     private settings: Settings;
     private update: any;
@@ -25,7 +25,9 @@ class MatchHeight implements IMatchHeight {
             property: 'height',
             remove: null,
             events: true,
-            throttle: 80
+            throttle: 80,
+            beforeUpdate: null,
+            afterUpdate: null
         }
 
         this.settings = {...default_settings, ...settings} as Settings;
@@ -35,16 +37,12 @@ class MatchHeight implements IMatchHeight {
         }
 
         if (this.settings.events) {
-
-            var $this = this;
-            this.update = function(){ $this._applyAll($this); };
-
+            this.update = this._applyAll.bind(this);
             if (document.readyState !== 'loading') {
-                this._applyAll($this);
+                this._applyAll();
             } else {
                 document.addEventListener( 'DOMContentLoaded', this.update, { once: true } );
             }
-
             if (this.settings.throttle && this.settings.throttle > 0) {
                 this.update = this._throttle( this.update, this.settings.throttle );
             }
@@ -95,7 +93,7 @@ class MatchHeight implements IMatchHeight {
      * @param {int} threshold
      */
     _throttle(fn: Function, threshold: number) {
-        let last: number, deferTimer: number;
+        let last: number, deferTimer: any;
         return function () {
             const now = Date.now();
             if (last && now < last + threshold) {
@@ -115,20 +113,22 @@ class MatchHeight implements IMatchHeight {
     /**
      * _applyAll
      * Initialize the common events
-     * @param {MatchHeight} $this
      */
-    _applyAll($this: MatchHeight) {
-
-        if (!$this) {
-            $this = this;
+    _applyAll() {
+        if (this.settings && this.settings.beforeUpdate) {
+            this.settings.beforeUpdate();
         }
 
-        $this._apply();
-        if ($this.settings.attributeName && $this._validateProperty($this.settings.attributeName)) {
-            $this._applyDataApi($this.settings.attributeName);
+        this._apply();
+        if (this.settings.attributeName && this._validateProperty(this.settings.attributeName)) {
+            this._applyDataApi(this.settings.attributeName);
         }
-        $this._applyDataApi('data-match-height');
-        $this._applyDataApi('data-mh');
+        this._applyDataApi('data-match-height');
+        this._applyDataApi('data-mh');
+
+        if (this.settings && this.settings.afterUpdate) {
+            this.settings.afterUpdate();
+        }
     }
 
     /**
@@ -161,7 +161,6 @@ class MatchHeight implements IMatchHeight {
      * @param {Array} elements
      */
     _rows(elements: HTMLElement[]) {
-        var $this = this;
         var tolerance: number = 1,
             lastTop: number = -1,
             listRows: HTMLElement[][] = [],
@@ -170,7 +169,7 @@ class MatchHeight implements IMatchHeight {
         // group elements by their top position
         elements.forEach(($that) => {
 
-            var top = $that.getBoundingClientRect().top - $this._parse(window.getComputedStyle($that).getPropertyValue('margin-top'));
+            var top = $that.getBoundingClientRect().top - this._parse(window.getComputedStyle($that).getPropertyValue('margin-top'));
 
             // if the row top is the same, add to the row group
             if (lastTop != -1 && Math.floor(Math.abs(lastTop - top)) >= tolerance) {
@@ -194,14 +193,12 @@ class MatchHeight implements IMatchHeight {
      * @param {String} property
      */
     _applyDataApi(property: string) {
-        var $this = this;
-
         var $row: HTMLElement[] = Array.from(this.wrapEl.querySelectorAll('[' + property + ']'));
         // generate groups by their groupId set by elements using data-match-height
         $row.forEach(($el) => {
             var groupId = $el.getAttribute(property);
-            $this.settings = $this._merge({attributeName: property, attributeValue: groupId}, $this.settings);
-            $this._apply();
+            this.settings = this._merge({attributeName: property, attributeValue: groupId}, this.settings);
+            this._apply();
         });
     }
 
@@ -230,14 +227,12 @@ class MatchHeight implements IMatchHeight {
      *  apply matchHeight to given elements
      */
     _apply() {
-
-        var $this = this;
-        var opts = $this.settings;
+        var opts = this.settings;
         var $elements: HTMLElement[] = []
         if (opts.elements && opts.elements.trim() != '') {
             $elements = Array.from(this.wrapEl.querySelectorAll(opts.elements));
         } else {
-            if (opts.attributeName && $this._validateProperty(opts.attributeName) && opts.attributeValue && opts.attributeValue.trim() != '') {
+            if (opts.attributeName && this._validateProperty(opts.attributeName) && opts.attributeValue && opts.attributeValue.trim() != '') {
                 $elements = Array.from(this.wrapEl.querySelectorAll('[' + opts.attributeName + '="' + opts.attributeValue + '"]'));
             }
         }
@@ -280,7 +275,7 @@ class MatchHeight implements IMatchHeight {
                 if (opts.byRow && $row.length <= 1) {
                     $row.forEach(($that) => {
                         if (opts.property)
-                            $this._resetStyle($that, opts.property);
+                            this._resetStyle($that, opts.property);
                     })
                     return;
                 }
@@ -344,10 +339,10 @@ class MatchHeight implements IMatchHeight {
                 }
 
                 // handle padding and border correctly (required when not using border-box)
-                verticalPadding = $this._parse(window.getComputedStyle($that).getPropertyValue('padding-top')) +
-                    $this._parse(window.getComputedStyle($that).getPropertyValue('padding-bottom')) +
-                    $this._parse(window.getComputedStyle($that).getPropertyValue('border-top-width')) +
-                    $this._parse(window.getComputedStyle($that).getPropertyValue('border-bottom-width'));
+                verticalPadding = this._parse(window.getComputedStyle($that).getPropertyValue('padding-top')) +
+                    this._parse(window.getComputedStyle($that).getPropertyValue('padding-bottom')) +
+                    this._parse(window.getComputedStyle($that).getPropertyValue('border-top-width')) +
+                    this._parse(window.getComputedStyle($that).getPropertyValue('border-bottom-width'));
 
                 // set the height (accounting for padding and border)
                 if (opts.property)
@@ -363,13 +358,13 @@ class MatchHeight implements IMatchHeight {
                         removedItems.forEach(($el) => {
                             if ($that === $el && opts.property) {
                                 if ($el instanceof HTMLElement) {
-                                    $this._resetStyle($el, opts.property);
+                                    this._resetStyle($el, opts.property);
                                 }
                             }
                         });
                     } else {
                         if ($that === opts.remove && opts.property) {
-                            $this._resetStyle($that, opts.property);
+                            this._resetStyle($that, opts.property);
                         }
                     }
                 }
@@ -387,10 +382,10 @@ class MatchHeight implements IMatchHeight {
     _resetStyle($that: HTMLElement, property: string) {
         if (this._validateProperty(property)) {
             $that.style.setProperty(property, '');
-            if ($that.getAttribute('style') === '') $that.removeAttribute('style');
+            if ($that.getAttribute('style') === '') {
+                $that.removeAttribute('style');
+            }
         }
     }
 
 }
-
-export default MatchHeight;

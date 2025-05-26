@@ -1,5 +1,5 @@
 import { Settings, IMatchHeight } from "./types";
-declare class MatchHeight implements IMatchHeight {
+export default class MatchHeight implements IMatchHeight {
     private wrapEl;
     private settings;
     private update;
@@ -8,7 +8,7 @@ declare class MatchHeight implements IMatchHeight {
     _unbind(): void;
     _merge(o1: any, o2: any): any;
     _throttle(fn: Function, threshold: number): () => void;
-    _applyAll($this: MatchHeight): void;
+    _applyAll(): void;
     _validateProperty(value: string): RegExpMatchArray | null;
     _parse(value: string): number;
     _rows(elements: HTMLElement[]): HTMLElement[][];
@@ -17,4 +17,3 @@ declare class MatchHeight implements IMatchHeight {
     _apply(): void;
     _resetStyle($that: HTMLElement, property: string): void;
 }
-export default MatchHeight;
