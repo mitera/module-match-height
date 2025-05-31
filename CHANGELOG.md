@@ -1,4 +1,11 @@
 <a name="1.0.2"></a>
+# 1.0.3 (2025-05-31)
+
+### release summary
+
+- Refactor `var` to `let` throughout the codebase
+
+<a name="1.0.2"></a>
 # 1.0.2 (2025-05-26)
 
 ### release summary
