@@ -4,6 +4,7 @@ type Item = {
     el: HTMLElement;
     top: number;
     height: number;
+    property: string;
 }
 
 export default class MatchHeight {
@@ -119,8 +120,25 @@ export default class MatchHeight {
 
     _applyDataApi(property: string) {
         let elements: HTMLElement[] = Array.from(this.wrapEl.querySelectorAll('[' + property + ']'));
+        elements.forEach( ( item ) => {
+            this._resetStyle(item, this.settings.property);
+        } );
 
-        this._update(elements);
+        const groups: Map<string, HTMLElement[]> = new Map();
+        elements.forEach((el) => {
+            const groupId = el.getAttribute(property);
+            if (groupId) {
+                if (!groups.has(groupId)) {
+                    groups.set(groupId, []);
+                }
+                groups.get(groupId)!.push(el);
+            }
+        });
+
+        // Apply once per unique group instead of once per element
+        groups.forEach((elements) => {
+            this._update(elements);
+        });
     }
 
     _apply() {
@@ -136,7 +154,7 @@ export default class MatchHeight {
         this._update(elements);
     }
 
-    _update(elements: HTMLElement[]) {
+    _update(elements: HTMLElement[], property: string = this.settings.attributeName || 'data-mh') {
         if ( elements.length === 0 ) return;
 
         this._remains = Array.prototype.map.call( elements, ( el: HTMLElement ): Item => {
@@ -145,6 +163,7 @@ export default class MatchHeight {
                 el,
                 top: 0,
                 height: 0,
+                property: el.getAttribute(property) || property
             };
 
         } ) as Item[];
@@ -199,7 +218,7 @@ export default class MatchHeight {
 
         } );
 
-        this._remains.sort( ( a, b ) => a.top - b.top );
+        this._remains.sort( ( a, b ) => a.top - b.top && a.property.localeCompare( b.property ));
 
         let rows = this._rows(this._remains);
         let processingTargets = rows[0];
