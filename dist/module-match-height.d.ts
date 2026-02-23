@@ -12,7 +12,7 @@ export default class MatchHeight {
     _applyAll(): void;
     _applyDataApi(attributeName: string): void;
     _apply(): void;
-    _update(elements: HTMLElement[], attribute?: string | null): void;
+    _update(elements: HTMLElement[]): void;
     private _rows;
     private _parse;
     private _process;

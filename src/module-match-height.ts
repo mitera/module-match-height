@@ -4,7 +4,6 @@ type Item = {
     el: HTMLElement;
     top: number;
     height: number;
-    attribute: string;
 }
 
 export default class MatchHeight {
@@ -137,7 +136,7 @@ export default class MatchHeight {
 
         // Apply once per unique group instead of once per element
         groups.forEach((elements) => {
-            this._update(elements, attributeName);
+            this._update(elements);
         });
     }
 
@@ -154,18 +153,15 @@ export default class MatchHeight {
         this._update(elements);
     }
 
-    _update(elements: HTMLElement[], attribute?: string | null) {
+    _update(elements: HTMLElement[]) {
         if ( elements.length === 0 ) return;
-
-        let attributeName = attribute ? attribute : this.settings.attributeName? this.settings.attributeName : null;
 
         this._remains = Array.prototype.map.call( elements, ( el: HTMLElement ): Item => {
 
             return {
                 el,
                 top: 0,
-                height: 0,
-                attribute: attributeName ? el.getAttribute(attributeName) || attributeName : ''
+                height: 0
             };
 
         } ) as Item[];
@@ -220,7 +216,7 @@ export default class MatchHeight {
 
         } );
 
-        this._remains.sort( ( a, b ) => a.top - b.top && a.attribute.localeCompare( b.attribute ));
+        this._remains.sort( ( a, b ) => a.top - b.top);
 
         let rows = this._rows(this._remains);
         let processingTargets = rows[0];

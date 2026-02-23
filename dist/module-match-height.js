@@ -118,7 +118,7 @@
 	            }
 	        });
 	        groups.forEach((elements) => {
-	            this._update(elements, attributeName);
+	            this._update(elements);
 	        });
 	    }
 	    _apply() {
@@ -134,16 +134,14 @@
 	        }
 	        this._update(elements);
 	    }
-	    _update(elements, attribute) {
+	    _update(elements) {
 	        if (elements.length === 0)
 	            return;
-	        let attributeName = attribute ? attribute : this.settings.attributeName ? this.settings.attributeName : null;
 	        this._remains = Array.prototype.map.call(elements, (el) => {
 	            return {
 	                el,
 	                top: 0,
-	                height: 0,
-	                attribute: attributeName ? el.getAttribute(attributeName) || attributeName : ''
+	                height: 0
 	            };
 	        });
 	        this._remains.forEach((item) => {
@@ -175,7 +173,7 @@
 	            item.top = this.settings.byRow ? (bb.top - this._parse(window.getComputedStyle(item.el).getPropertyValue('margin-top'))) : 0;
 	            item.height = bb.height;
 	        });
-	        this._remains.sort((a, b) => a.top - b.top && a.attribute.localeCompare(b.attribute));
+	        this._remains.sort((a, b) => a.top - b.top);
 	        let rows = this._rows(this._remains);
 	        let processingTargets = rows[0];
 	        let maxHeightInRow = 0;
