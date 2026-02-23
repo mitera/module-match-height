@@ -1,4 +1,11 @@
-<a name="1.0.2"></a>
+<a name="1.1.0"></a>
+# 1.1.0 (2026-02-23)
+
+### release summary
+
+Removed redundant comments and unused code, simplified methods, and introduced type definitions for improved maintainability and readability. Enhanced logic for processing elements and applying height matching with optimized row handling.
+
+<a name="1.0.3"></a>
 # 1.0.3 (2025-05-31)
 
 ### release summary

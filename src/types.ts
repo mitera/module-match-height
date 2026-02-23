@@ -4,7 +4,7 @@ interface Settings {
     target?: HTMLElement | null;
     attributeName?: string | null;
     attributeValue?: string | null;
-    property?: string | null;
+    property: string;
     remove?: HTMLElement | null;
     events?: boolean | null;
     throttle?: number | null;

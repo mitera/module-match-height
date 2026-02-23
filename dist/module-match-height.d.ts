@@ -1,19 +1,21 @@
-import { Settings, IMatchHeight } from "./types";
-export default class MatchHeight implements IMatchHeight {
+import { Settings } from "types";
+export default class MatchHeight {
     private wrapEl;
     private settings;
     private update;
+    private _remains;
     constructor(wrapEl: HTMLElement, settings?: Settings);
     _init(): void;
     _unbind(): void;
-    _merge(o1: any, o2: any): any;
+    _remove(): void;
     _throttle(fn: Function, threshold: number): () => void;
     _applyAll(): void;
-    _validateProperty(value: string): RegExpMatchArray | null;
-    _parse(value: string): number;
-    _rows(elements: HTMLElement[]): HTMLElement[][];
     _applyDataApi(property: string): void;
-    _remove(): void;
     _apply(): void;
+    _update(elements: HTMLElement[]): void;
+    private _rows;
+    private _parse;
+    private _process;
+    _validateProperty(value: string): RegExpMatchArray | null;
     _resetStyle($that: HTMLElement, property: string): void;
 }

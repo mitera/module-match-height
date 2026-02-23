@@ -12,6 +12,7 @@
 
 	class MatchHeight {
 	    constructor(wrapEl, settings) {
+	        this._remains = [];
 	        this.wrapEl = wrapEl;
 	        let default_settings = {
 	            elements: null,
@@ -52,13 +53,23 @@
 	        window.removeEventListener("resize", this.update);
 	        window.removeEventListener("orientationchange", this.update);
 	    }
-	    _merge(o1, o2) {
-	        if (o1 != null) {
-	            for (let i in o1) {
-	                o2[i] = o1[i];
+	    _remove() {
+	        let elements = [];
+	        let opts = this.settings;
+	        if (opts.elements) {
+	            elements = Array.from(this.wrapEl.querySelectorAll(opts.elements));
+	        }
+	        else {
+	            if (opts.attributeName && opts.attributeValue) {
+	                elements = Array.from(this.wrapEl.querySelectorAll('[' + opts.attributeName + '="' + opts.attributeValue + '"]'));
 	            }
 	        }
-	        return o2;
+	        elements.forEach((item) => {
+	            if (opts.property)
+	                item.style.setProperty(opts.property, '');
+	            if (item.getAttribute('style') === '')
+	                item.removeAttribute('style');
+	        });
 	    }
 	    _throttle(fn, threshold) {
 	        let last, deferTimer;
@@ -91,18 +102,42 @@
 	            this.settings.afterUpdate();
 	        }
 	    }
-	    _validateProperty(value) {
-	        return String(value)
-	            .toLowerCase()
-	            .match(/^([a-z-]{2,})$/);
+	    _applyDataApi(property) {
+	        let elements = Array.from(this.wrapEl.querySelectorAll('[' + property + ']'));
+	        this._update(elements);
 	    }
-	    _parse(value) {
-	        return parseFloat(value) || 0;
+	    _apply() {
+	        let opts = this.settings;
+	        let elements = [];
+	        if (opts.elements && opts.elements.trim() != '') {
+	            elements = Array.from(this.wrapEl.querySelectorAll(opts.elements));
+	        }
+	        else {
+	            if (opts.attributeName && this._validateProperty(opts.attributeName) && opts.attributeValue && opts.attributeValue.trim() != '') {
+	                elements = Array.from(this.wrapEl.querySelectorAll('[' + opts.attributeName + '="' + opts.attributeValue + '"]'));
+	            }
+	        }
+	        this._update(elements);
+	    }
+	    _update(elements) {
+	        if (elements.length === 0)
+	            return;
+	        this._remains = Array.prototype.map.call(elements, (el) => {
+	            return {
+	                el,
+	                top: 0,
+	                height: 0,
+	            };
+	        });
+	        this._remains.forEach((item) => {
+	            this._resetStyle(item.el, this.settings.property);
+	        });
+	        this._process();
 	    }
 	    _rows(elements) {
 	        let tolerance = 1, lastTop = -1, listRows = [], rows = [];
 	        elements.forEach(($that) => {
-	            let top = $that.getBoundingClientRect().top - this._parse(window.getComputedStyle($that).getPropertyValue('margin-top'));
+	            let top = $that.top;
 	            if (lastTop != -1 && Math.floor(Math.abs(lastTop - top)) >= tolerance) {
 	                listRows.push(rows);
 	                rows = [];
@@ -114,143 +149,60 @@
 	        listRows.push(rows);
 	        return listRows;
 	    }
-	    _applyDataApi(property) {
-	        let $row = Array.from(this.wrapEl.querySelectorAll('[' + property + ']'));
-	        $row.forEach(($el) => {
-	            let groupId = $el.getAttribute(property);
-	            this.settings = this._merge({ attributeName: property, attributeValue: groupId }, this.settings);
-	            this._apply();
-	        });
+	    _parse(value) {
+	        return parseFloat(value) || 0;
 	    }
-	    _remove() {
-	        let $elements = [];
-	        let opts = this.settings;
-	        if (opts.elements) {
-	            $elements = Array.from(this.wrapEl.querySelectorAll(opts.elements));
-	        }
-	        else {
-	            if (opts.attributeName && opts.attributeValue) {
-	                $elements = Array.from(this.wrapEl.querySelectorAll('[' + opts.attributeName + '="' + opts.attributeValue + '"]'));
-	            }
-	        }
-	        $elements.forEach((item) => {
-	            if (opts.property)
-	                item.style.setProperty(opts.property, '');
-	            if (item.getAttribute('style') === '')
-	                item.removeAttribute('style');
+	    _process() {
+	        this._remains.forEach((item) => {
+	            const bb = item.el.getBoundingClientRect();
+	            item.top = this.settings.byRow ? (bb.top - this._parse(window.getComputedStyle(item.el).getPropertyValue('margin-top'))) : 0;
+	            item.height = bb.height;
 	        });
-	    }
-	    _apply() {
-	        let opts = this.settings;
-	        let $elements = [];
-	        if (opts.elements && opts.elements.trim() != '') {
-	            $elements = Array.from(this.wrapEl.querySelectorAll(opts.elements));
-	        }
-	        else {
-	            if (opts.attributeName && this._validateProperty(opts.attributeName) && opts.attributeValue && opts.attributeValue.trim() != '') {
-	                $elements = Array.from(this.wrapEl.querySelectorAll('[' + opts.attributeName + '="' + opts.attributeValue + '"]'));
-	            }
-	        }
-	        let rows = [$elements];
-	        if (opts.byRow && !opts.target) {
-	            $elements.forEach(($that) => {
-	                let display = window.getComputedStyle($that).getPropertyValue('display');
-	                if (display && (display !== 'inline-block' && display !== 'flex' && display !== 'inline-flex')) {
-	                    display = 'display: block; ';
-	                }
-	                $that.setAttribute('style-cache', $that.getAttribute('style') || '');
-	                $that.setAttribute('style', display + 'padding-top: 0; padding-bottom: 0; margin-top: 0; margin-bottom: 0; border-top-width: 0; border-bottom-width: 0; height: 100px; overflow: hidden;');
-	            });
-	            rows = this._rows($elements);
-	            $elements.forEach(($that) => {
-	                $that.setAttribute('style', $that.getAttribute('style-cache') || '');
-	                $that.removeAttribute('style-cache');
-	                if ($that.getAttribute('style') === '')
-	                    $that.removeAttribute('style');
-	            });
-	        }
-	        rows.forEach(($row) => {
-	            let targetHeight = 0;
-	            if (!opts.target) {
-	                if (opts.byRow && $row.length <= 1) {
-	                    $row.forEach(($that) => {
-	                        if (opts.property)
-	                            this._resetStyle($that, opts.property);
-	                    });
-	                    return;
-	                }
-	                $row.forEach(($that) => {
-	                    let style = $that.getAttribute('style') || '', display = window.getComputedStyle($that).getPropertyValue('display');
-	                    if (display && (display !== 'inline-block' && display !== 'flex' && display !== 'inline-flex')) {
-	                        display = 'block';
-	                    }
-	                    $that.setAttribute('style', 'display: ' + display + ';');
-	                    let isTarget = true;
-	                    if (opts.remove) {
-	                        if (opts.remove instanceof NodeList) {
-	                            opts.remove.forEach(($el) => {
-	                                if ($that === $el) {
-	                                    isTarget = false;
-	                                }
-	                            });
-	                        }
-	                        else {
-	                            if ($that === opts.remove) {
-	                                isTarget = false;
-	                            }
-	                        }
-	                    }
-	                    if (isTarget) {
-	                        if ($that.getBoundingClientRect().height > targetHeight) {
-	                            targetHeight = $that.getBoundingClientRect().height;
-	                        }
-	                    }
-	                    if (style) {
-	                        $that.setAttribute('style', style);
-	                    }
-	                    else {
-	                        $that.style.setProperty('display', '');
-	                    }
-	                    if ($that.getAttribute('style') === '')
-	                        $that.removeAttribute('style');
-	                });
+	        this._remains.sort((a, b) => a.top - b.top);
+	        let rows = this._rows(this._remains);
+	        let processingTargets = rows[0];
+	        let maxHeightInRow = 0;
+	        if (this.settings.target)
+	            maxHeightInRow = this.settings.target.getBoundingClientRect().height;
+	        else
+	            maxHeightInRow = Math.max(...processingTargets.map((item) => item.height));
+	        processingTargets.forEach((item) => {
+	            const styles = window.getComputedStyle(item.el);
+	            const isBorderBox = styles.boxSizing === 'border-box';
+	            if (isBorderBox) {
+	                if (this.settings.property)
+	                    item.el.style.setProperty(this.settings.property, `${maxHeightInRow}px`);
 	            }
 	            else {
-	                targetHeight = opts.target.getBoundingClientRect().height;
+	                const paddingAndBorder = (parseFloat(styles.paddingTop) || 0) +
+	                    (parseFloat(styles.paddingBottom) || 0) +
+	                    (parseFloat(styles.borderTopWidth) || 0) +
+	                    (parseFloat(styles.borderBottomWidth) || 0);
+	                if (this.settings.property)
+	                    item.el.style.setProperty(this.settings.property, `${maxHeightInRow - paddingAndBorder}px`);
 	            }
-	            $row.forEach(($that) => {
-	                let verticalPadding = 0;
-	                if (opts.target && $that === opts.target) {
-	                    return;
-	                }
-	                verticalPadding = this._parse(window.getComputedStyle($that).getPropertyValue('padding-top')) +
-	                    this._parse(window.getComputedStyle($that).getPropertyValue('padding-bottom')) +
-	                    this._parse(window.getComputedStyle($that).getPropertyValue('border-top-width')) +
-	                    this._parse(window.getComputedStyle($that).getPropertyValue('border-bottom-width'));
-	                if (opts.property)
-	                    $that.style.setProperty(opts.property, (targetHeight - verticalPadding) + 'px');
-	                if (opts.property && $that.getBoundingClientRect().height < targetHeight) {
-	                    $that.style.setProperty(opts.property, targetHeight + 'px');
-	                }
-	                if (opts.remove) {
-	                    if (opts.remove instanceof NodeList) {
-	                        let removedItems = Array.from(opts.remove);
-	                        removedItems.forEach(($el) => {
-	                            if ($that === $el && opts.property) {
-	                                if ($el instanceof HTMLElement) {
-	                                    this._resetStyle($el, opts.property);
-	                                }
-	                            }
-	                        });
-	                    }
-	                    else {
-	                        if ($that === opts.remove && opts.property) {
-	                            this._resetStyle($that, opts.property);
+	            if (this.settings.remove) {
+	                if (this.settings.remove instanceof NodeList) {
+	                    Array.from(this.settings.remove).forEach((el) => {
+	                        if (item.el === el && this.settings.property && el instanceof HTMLElement) {
+	                            this._resetStyle(el, this.settings.property);
 	                        }
-	                    }
+	                    });
 	                }
-	            });
+	                else if (item.el === this.settings.remove && this.settings.property) {
+	                    this._resetStyle(item.el, this.settings.property);
+	                }
+	            }
+	            this._remains = this._remains.filter((remain) => remain !== item);
 	        });
+	        if (rows.length > 1) {
+	            this._process();
+	        }
+	    }
+	    _validateProperty(value) {
+	        return String(value)
+	            .toLowerCase()
+	            .match(/^([a-z-]{2,})/);
 	    }
 	    _resetStyle($that, property) {
 	        if (this._validateProperty(property)) {
