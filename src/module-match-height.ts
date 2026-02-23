@@ -4,7 +4,7 @@ type Item = {
     el: HTMLElement;
     top: number;
     height: number;
-    property: string;
+    attribute: string;
 }
 
 export default class MatchHeight {
@@ -163,7 +163,7 @@ export default class MatchHeight {
                 el,
                 top: 0,
                 height: 0,
-                property: el.getAttribute(property) || property
+                attribute: el.getAttribute(property) || property
             };
 
         } ) as Item[];
@@ -218,7 +218,7 @@ export default class MatchHeight {
 
         } );
 
-        this._remains.sort( ( a, b ) => a.top - b.top && a.property.localeCompare( b.property ));
+        this._remains.sort( ( a, b ) => a.top - b.top && a.attribute.localeCompare( b.attribute ));
 
         let rows = this._rows(this._remains);
         let processingTargets = rows[0];

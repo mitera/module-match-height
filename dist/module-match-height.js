@@ -104,7 +104,22 @@
 	    }
 	    _applyDataApi(property) {
 	        let elements = Array.from(this.wrapEl.querySelectorAll('[' + property + ']'));
-	        this._update(elements);
+	        elements.forEach((item) => {
+	            this._resetStyle(item, this.settings.property);
+	        });
+	        const groups = new Map();
+	        elements.forEach((el) => {
+	            const groupId = el.getAttribute(property);
+	            if (groupId) {
+	                if (!groups.has(groupId)) {
+	                    groups.set(groupId, []);
+	                }
+	                groups.get(groupId).push(el);
+	            }
+	        });
+	        groups.forEach((elements) => {
+	            this._update(elements);
+	        });
 	    }
 	    _apply() {
 	        let opts = this.settings;
@@ -119,7 +134,7 @@
 	        }
 	        this._update(elements);
 	    }
-	    _update(elements) {
+	    _update(elements, property = this.settings.attributeName || 'data-mh') {
 	        if (elements.length === 0)
 	            return;
 	        this._remains = Array.prototype.map.call(elements, (el) => {
@@ -127,6 +142,7 @@
 	                el,
 	                top: 0,
 	                height: 0,
+	                attribute: el.getAttribute(property) || property
 	            };
 	        });
 	        this._remains.forEach((item) => {
@@ -158,7 +174,7 @@
 	            item.top = this.settings.byRow ? (bb.top - this._parse(window.getComputedStyle(item.el).getPropertyValue('margin-top'))) : 0;
 	            item.height = bb.height;
 	        });
-	        this._remains.sort((a, b) => a.top - b.top);
+	        this._remains.sort((a, b) => a.top - b.top && a.attribute.localeCompare(b.attribute));
 	        let rows = this._rows(this._remains);
 	        let processingTargets = rows[0];
 	        let maxHeightInRow = 0;
