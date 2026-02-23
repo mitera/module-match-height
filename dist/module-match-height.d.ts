@@ -10,7 +10,7 @@ export default class MatchHeight {
     _remove(): void;
     _throttle(fn: Function, threshold: number): () => void;
     _applyAll(): void;
-    _applyDataApi(property: string): void;
+    _applyDataApi(attributeName: string): void;
     _apply(): void;
     _update(elements: HTMLElement[], attribute?: string): void;
     private _rows;

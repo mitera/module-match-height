@@ -102,14 +102,14 @@
 	            this.settings.afterUpdate();
 	        }
 	    }
-	    _applyDataApi(property) {
-	        let elements = Array.from(this.wrapEl.querySelectorAll('[' + property + ']'));
+	    _applyDataApi(attributeName) {
+	        let elements = Array.from(this.wrapEl.querySelectorAll('[' + attributeName + ']'));
 	        elements.forEach((item) => {
 	            this._resetStyle(item, this.settings.property);
 	        });
 	        const groups = new Map();
 	        elements.forEach((el) => {
-	            const groupId = el.getAttribute(property);
+	            const groupId = el.getAttribute(attributeName);
 	            if (groupId) {
 	                if (!groups.has(groupId)) {
 	                    groups.set(groupId, []);
@@ -118,7 +118,7 @@
 	            }
 	        });
 	        groups.forEach((elements) => {
-	            this._update(elements);
+	            this._update(elements, attributeName);
 	        });
 	    }
 	    _apply() {
@@ -134,15 +134,16 @@
 	        }
 	        this._update(elements);
 	    }
-	    _update(elements, attribute = this.settings.attributeName || 'data-mh') {
+	    _update(elements, attribute = this.settings.attributeName || '') {
 	        if (elements.length === 0)
 	            return;
+	        let attributeName = attribute ? attribute : this.settings.attributeName ? this.settings.attributeName : '';
 	        this._remains = Array.prototype.map.call(elements, (el) => {
 	            return {
 	                el,
 	                top: 0,
 	                height: 0,
-	                attribute: el.getAttribute(attribute) || attribute
+	                attribute: el.getAttribute(attributeName) || attributeName
 	            };
 	        });
 	        this._remains.forEach((item) => {
