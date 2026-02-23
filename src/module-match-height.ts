@@ -154,7 +154,7 @@ export default class MatchHeight {
         this._update(elements);
     }
 
-    _update(elements: HTMLElement[], property: string = this.settings.attributeName || 'data-mh') {
+    _update(elements: HTMLElement[], attribute: string = this.settings.attributeName || 'data-mh') {
         if ( elements.length === 0 ) return;
 
         this._remains = Array.prototype.map.call( elements, ( el: HTMLElement ): Item => {
@@ -163,7 +163,7 @@ export default class MatchHeight {
                 el,
                 top: 0,
                 height: 0,
-                attribute: el.getAttribute(property) || property
+                attribute: el.getAttribute(attribute) || attribute
             };
 
         } ) as Item[];
