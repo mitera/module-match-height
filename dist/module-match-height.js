@@ -1,6 +1,6 @@
 /*!
  * @author Simone Miterangelis <simone@mite.it>
- * module-match-height v1.0.3 by @mitera
+ * module-match-height v1.1.0 by @mitera
  * https://github.com/mitera/module-match-height
  * Released under the MIT License.
  */
@@ -193,9 +193,9 @@
 	                    this._resetStyle(item.el, this.settings.property);
 	                }
 	            }
-	            this._remains = this._remains.filter((remain) => remain !== item);
 	        });
-	        if (rows.length > 1) {
+	        this._remains.splice(0, processingTargets.length);
+	        if (0 < this._remains.length) {
 	            this._process();
 	        }
 	    }
