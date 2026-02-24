@@ -149,33 +149,16 @@
 	        });
 	        this._process();
 	    }
-	    _rows(elements) {
-	        let tolerance = 1, lastTop = -1, listRows = [], rows = [];
-	        elements.forEach(($that) => {
-	            let top = $that.top;
-	            if (lastTop != -1 && Math.floor(Math.abs(lastTop - top)) >= tolerance) {
-	                listRows.push(rows);
-	                rows = [];
-	                lastTop = -1;
-	            }
-	            rows.push($that);
-	            lastTop = top;
-	        });
-	        listRows.push(rows);
-	        return listRows;
-	    }
-	    _parse(value) {
-	        return parseFloat(value) || 0;
-	    }
 	    _process() {
 	        this._remains.forEach((item) => {
 	            const bb = item.el.getBoundingClientRect();
-	            item.top = this.settings.byRow ? (bb.top - this._parse(window.getComputedStyle(item.el).getPropertyValue('margin-top'))) : 0;
+	            item.top = this.settings.byRow ? bb.top : 0;
 	            item.height = bb.height;
 	        });
 	        this._remains.sort((a, b) => a.top - b.top);
-	        let rows = this._rows(this._remains);
-	        let processingTargets = rows[0];
+	        const errorThreshold = 1;
+	        const processingTop = this._remains[0].top;
+	        const processingTargets = this._remains.filter(item => Math.abs(item.top - processingTop) <= errorThreshold);
 	        let maxHeightInRow = 0;
 	        if (this.settings.target)
 	            maxHeightInRow = this.settings.target.getBoundingClientRect().height;

@@ -173,53 +173,22 @@ export default class MatchHeight {
         this._process();
     }
 
-    private _rows(elements: Item[]) {
-        let tolerance: number = 1,
-            lastTop: number = -1,
-            listRows: Item[][] = [],
-            rows: Item[] = [];
-
-        // group elements by their top position
-        elements.forEach(($that) => {
-
-            let top = $that.top;
-
-            // if the row top is the same, add to the row group
-            if (lastTop != -1 && Math.floor(Math.abs(lastTop - top)) >= tolerance) {
-                listRows.push(rows);
-                rows = [];
-                lastTop = -1;
-            }
-            rows.push($that);
-
-            // keep track of the last row top
-            lastTop = top;
-        });
-        listRows.push(rows);
-
-        return listRows;
-    }
-
-    private _parse(value: string) {
-        // parse value and convert NaN to 0
-        return parseFloat(value) || 0;
-    }
-
     private _process() {
 
         this._remains.forEach( ( item ) => {
 
             const bb = item.el.getBoundingClientRect();
 
-            item.top    = this.settings.byRow ? (bb.top - this._parse(window.getComputedStyle(item.el).getPropertyValue('margin-top'))) : 0;
+            item.top    = this.settings.byRow ? bb.top : 0;
             item.height = bb.height;
 
         } );
 
         this._remains.sort( ( a, b ) => a.top - b.top);
 
-        let rows = this._rows(this._remains);
-        let processingTargets = rows[0];
+        const errorThreshold = 1;
+        const processingTop = this._remains[0].top;
+        const processingTargets = this._remains.filter(item => Math.abs(item.top - processingTop) <= errorThreshold);
 
         let maxHeightInRow = 0;
         if (this.settings.target) maxHeightInRow = this.settings.target.getBoundingClientRect().height;

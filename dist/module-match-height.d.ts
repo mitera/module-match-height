@@ -13,8 +13,6 @@ export default class MatchHeight {
     _applyDataApi(attributeName: string): void;
     _apply(): void;
     _update(elements: HTMLElement[]): void;
-    private _rows;
-    private _parse;
     private _process;
     _validateProperty(value: string): RegExpMatchArray | null;
     _resetStyle($that: HTMLElement, property: string): void;
