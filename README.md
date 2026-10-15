@@ -50,7 +50,7 @@ CDN via jsDelivr
 
     <script src="https://cdn.jsdelivr.net/npm/module-match-height@latest/dist/module-match-height.min.js" type="text/javascript"></script>
 
-In production, pin an exact version instead of `@latest` (e.g. `module-match-height@1.1.0`), so the script cannot change without notice.
+In production, pin an exact version instead of `@latest` (e.g. `module-match-height@1.2.0`), so the script cannot change without notice.
 
 Download [module-match-height.js](https://github.com/mitera/module-match-height/blob/main/dist/module-match-height.js) and include the script in your HTML file:
 

@@ -1,5 +1,5 @@
-<a name="unreleased"></a>
-# Unreleased
+<a name="1.2.0"></a>
+# 1.2.0 (2026-10-15)
 
 ### release summary
 
@@ -16,6 +16,7 @@
 - Added `dataApi` option (default `true`) to skip the `data-mh` / `data-match-height` groups on instances sharing the same container
 - Package: published files limited to `dist` (plus README, LICENSE), removed unused `esbuild` dev dependency and the empty `dist/types.js` / `dist/types.min.js`
 - Docs: fixed links to the `main` branch and the download link, documented `attributeValue` and `dataApi`
+- Build: Rollup banner, input and output are read from `package.json`
 - Security: updated dev dependencies (`rollup` GHSA-mw96-cpmx-2vgc, `picomatch` GHSA-3v7f-55p6-f55p / GHSA-c2c7-rcm5-vvqj)
 
 <a name="1.1.0"></a>
