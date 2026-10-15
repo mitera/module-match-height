@@ -10,9 +10,14 @@
 	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.MatchHeight = factory());
 })(this, (function () { 'use strict';
 
+	const ATTRIBUTE_NAME_PATTERN = /^[a-z][a-z0-9_-]*$/i;
+	const PROPERTY_NAME_PATTERN = /^-{0,2}[a-z][a-z0-9-]*$/i;
+	const ROW_ERROR_THRESHOLD = 1;
 	class MatchHeight {
 	    constructor(wrapEl, settings) {
-	        this._remains = [];
+	        if (!wrapEl || typeof wrapEl.querySelectorAll !== 'function') {
+	            throw new TypeError('MatchHeight: wrapEl must be a DOM element');
+	        }
 	        this.wrapEl = wrapEl;
 	        let default_settings = {
 	            elements: null,
@@ -22,25 +27,29 @@
 	            attributeValue: null,
 	            property: 'height',
 	            remove: null,
+	            dataApi: true,
 	            events: true,
 	            throttle: 80,
 	            beforeUpdate: null,
 	            afterUpdate: null
 	        };
 	        this.settings = Object.assign(Object.assign({}, default_settings), settings);
-	        if (this.settings.property && !this._validateProperty(this.settings.property)) {
-	            this.settings.property = 'height';
-	        }
+	        const property = this.settings.property ? this._normalizeProperty(this.settings.property) : '';
+	        this.property = this._validateProperty(property) ? property : 'height';
+	        this._ready = this._applyAll.bind(this);
+	        this.update = this._ready;
 	        if (this.settings.events) {
-	            this.update = this._applyAll.bind(this);
-	            if (document.readyState !== 'loading') {
-	                this._applyAll();
+	            if (this.settings.throttle && this.settings.throttle > 0) {
+	                this.update = this._throttle(this._ready, this.settings.throttle);
+	            }
+	            if (document.readyState === 'loading') {
+	                document.addEventListener('DOMContentLoaded', this._ready, { once: true });
 	            }
 	            else {
-	                document.addEventListener('DOMContentLoaded', this.update, { once: true });
+	                this._applyAll();
 	            }
-	            if (this.settings.throttle && this.settings.throttle > 0) {
-	                this.update = this._throttle(this.update, this.settings.throttle);
+	            if (document.readyState !== 'complete') {
+	                window.addEventListener('load', this._ready, { once: true });
 	            }
 	            this._init();
 	        }
@@ -50,35 +59,25 @@
 	        window.addEventListener("orientationchange", this.update);
 	    }
 	    _unbind() {
+	        document.removeEventListener('DOMContentLoaded', this._ready);
+	        window.removeEventListener('load', this._ready);
 	        window.removeEventListener("resize", this.update);
 	        window.removeEventListener("orientationchange", this.update);
+	        clearTimeout(this._throttleTimer);
 	    }
 	    _remove() {
-	        let elements = [];
-	        let opts = this.settings;
-	        if (opts.elements) {
-	            elements = Array.from(this.wrapEl.querySelectorAll(opts.elements));
-	        }
-	        else {
-	            if (opts.attributeName && opts.attributeValue) {
-	                elements = Array.from(this.wrapEl.querySelectorAll('[' + opts.attributeName + '="' + opts.attributeValue + '"]'));
-	            }
-	        }
-	        elements.forEach((item) => {
-	            if (opts.property)
-	                item.style.setProperty(opts.property, '');
-	            if (item.getAttribute('style') === '')
-	                item.removeAttribute('style');
+	        this._getElements().forEach((item) => {
+	            this._resetStyle(item, this.property);
 	        });
 	    }
 	    _throttle(fn, threshold) {
-	        let last, deferTimer;
-	        return function () {
+	        let last = 0;
+	        return () => {
 	            const now = Date.now();
+	            clearTimeout(this._throttleTimer);
 	            if (last && now < last + threshold) {
-	                clearTimeout(deferTimer);
-	                deferTimer = setTimeout(function () {
-	                    last = now;
+	                this._throttleTimer = setTimeout(() => {
+	                    last = Date.now();
 	                    fn();
 	                }, threshold);
 	            }
@@ -89,24 +88,27 @@
 	        };
 	    }
 	    _applyAll() {
-	        if (this.settings && this.settings.beforeUpdate) {
+	        if (this.settings.beforeUpdate) {
 	            this.settings.beforeUpdate();
 	        }
 	        this._apply();
-	        if (this.settings.attributeName && this._validateProperty(this.settings.attributeName)) {
-	            this._applyDataApi(this.settings.attributeName);
+	        const attributeName = this.settings.attributeName;
+	        if (attributeName && this._validateAttributeName(attributeName)
+	            && attributeName !== 'data-match-height' && attributeName !== 'data-mh') {
+	            this._applyDataApi(attributeName);
 	        }
-	        this._applyDataApi('data-match-height');
-	        this._applyDataApi('data-mh');
-	        if (this.settings && this.settings.afterUpdate) {
+	        if (this.settings.dataApi) {
+	            this._applyDataApi('data-match-height');
+	            this._applyDataApi('data-mh');
+	        }
+	        if (this.settings.afterUpdate) {
 	            this.settings.afterUpdate();
 	        }
 	    }
 	    _applyDataApi(attributeName) {
-	        let elements = Array.from(this.wrapEl.querySelectorAll('[' + attributeName + ']'));
-	        elements.forEach((item) => {
-	            this._resetStyle(item, this.settings.property);
-	        });
+	        if (!this._validateAttributeName(attributeName))
+	            return;
+	        const elements = Array.from(this.wrapEl.querySelectorAll('[' + attributeName + ']'));
 	        const groups = new Map();
 	        elements.forEach((el) => {
 	            const groupId = el.getAttribute(attributeName);
@@ -122,87 +124,88 @@
 	        });
 	    }
 	    _apply() {
-	        let opts = this.settings;
-	        let elements = [];
-	        if (opts.elements && opts.elements.trim() != '') {
-	            elements = Array.from(this.wrapEl.querySelectorAll(opts.elements));
-	        }
-	        else {
-	            if (opts.attributeName && this._validateProperty(opts.attributeName) && opts.attributeValue && opts.attributeValue.trim() != '') {
-	                elements = Array.from(this.wrapEl.querySelectorAll('[' + opts.attributeName + '="' + opts.attributeValue + '"]'));
-	            }
-	        }
-	        this._update(elements);
+	        this._update(this._getElements());
 	    }
 	    _update(elements) {
 	        if (elements.length === 0)
 	            return;
-	        this._remains = Array.prototype.map.call(elements, (el) => {
-	            return {
-	                el,
-	                top: 0,
-	                height: 0
-	            };
+	        elements.forEach((el) => {
+	            this._resetStyle(el, this.property);
 	        });
-	        this._remains.forEach((item) => {
-	            this._resetStyle(item.el, this.settings.property);
-	        });
-	        this._process();
+	        const excluded = this._getExcludedElements();
+	        const items = elements
+	            .filter((el) => !excluded.includes(el))
+	            .filter((el) => el.getClientRects().length > 0)
+	            .map((el) => ({ el, top: 0, height: 0 }));
+	        this._process(items);
 	    }
-	    _process() {
-	        this._remains.forEach((item) => {
-	            const bb = item.el.getBoundingClientRect();
-	            item.top = this.settings.byRow ? bb.top : 0;
-	            item.height = bb.height;
-	        });
-	        this._remains.sort((a, b) => a.top - b.top);
-	        const errorThreshold = 1;
-	        const processingTop = this._remains[0].top;
-	        const processingTargets = this._remains.filter(item => Math.abs(item.top - processingTop) <= errorThreshold);
-	        let maxHeightInRow = 0;
-	        if (this.settings.target)
-	            maxHeightInRow = this.settings.target.getBoundingClientRect().height;
-	        else
-	            maxHeightInRow = Math.max(...processingTargets.map((item) => item.height));
-	        processingTargets.forEach((item) => {
-	            const styles = window.getComputedStyle(item.el);
-	            const isBorderBox = styles.boxSizing === 'border-box';
-	            if (isBorderBox) {
-	                if (this.settings.property)
-	                    item.el.style.setProperty(this.settings.property, `${maxHeightInRow}px`);
-	            }
-	            else {
-	                const paddingAndBorder = (parseFloat(styles.paddingTop) || 0) +
-	                    (parseFloat(styles.paddingBottom) || 0) +
-	                    (parseFloat(styles.borderTopWidth) || 0) +
-	                    (parseFloat(styles.borderBottomWidth) || 0);
-	                if (this.settings.property)
-	                    item.el.style.setProperty(this.settings.property, `${maxHeightInRow - paddingAndBorder}px`);
-	            }
-	            if (this.settings.remove) {
-	                if (this.settings.remove instanceof NodeList) {
-	                    Array.from(this.settings.remove).forEach((el) => {
-	                        if (item.el === el && this.settings.property && el instanceof HTMLElement) {
-	                            this._resetStyle(el, this.settings.property);
-	                        }
-	                    });
+	    _process(remains) {
+	        while (remains.length > 0) {
+	            remains.forEach((item) => {
+	                const bb = item.el.getBoundingClientRect();
+	                item.top = this.settings.byRow ? bb.top : 0;
+	                item.height = bb.height;
+	            });
+	            remains.sort((a, b) => a.top - b.top);
+	            const processingTop = remains[0].top;
+	            const processingTargets = remains.filter(item => Math.abs(item.top - processingTop) <= ROW_ERROR_THRESHOLD);
+	            remains = remains.slice(processingTargets.length);
+	            if (processingTargets.length < 2 && !this.settings.target)
+	                continue;
+	            let maxHeightInRow = 0;
+	            if (this.settings.target)
+	                maxHeightInRow = this.settings.target.getBoundingClientRect().height;
+	            else
+	                maxHeightInRow = Math.max(...processingTargets.map((item) => item.height));
+	            processingTargets.forEach((item) => {
+	                const styles = window.getComputedStyle(item.el);
+	                let value = maxHeightInRow;
+	                if (styles.boxSizing !== 'border-box') {
+	                    value -=
+	                        (parseFloat(styles.paddingTop) || 0) +
+	                            (parseFloat(styles.paddingBottom) || 0) +
+	                            (parseFloat(styles.borderTopWidth) || 0) +
+	                            (parseFloat(styles.borderBottomWidth) || 0);
 	                }
-	                else if (item.el === this.settings.remove && this.settings.property) {
-	                    this._resetStyle(item.el, this.settings.property);
-	                }
-	            }
-	        });
-	        this._remains.splice(0, processingTargets.length);
-	        if (0 < this._remains.length) {
-	            this._process();
+	                item.el.style.setProperty(this.property, `${Math.max(0, value)}px`);
+	            });
 	        }
 	    }
+	    _getElements() {
+	        const opts = this.settings;
+	        if (opts.elements && opts.elements.trim() !== '') {
+	            return Array.from(this.wrapEl.querySelectorAll(opts.elements));
+	        }
+	        if (opts.attributeName && this._validateAttributeName(opts.attributeName) && opts.attributeValue && opts.attributeValue.trim() !== '') {
+	            const attributeName = opts.attributeName;
+	            const attributeValue = opts.attributeValue;
+	            return Array.from(this.wrapEl.querySelectorAll('[' + attributeName + ']'))
+	                .filter((el) => el.getAttribute(attributeName) === attributeValue);
+	        }
+	        return [];
+	    }
+	    _getExcludedElements() {
+	        const remove = this.settings.remove;
+	        if (!remove)
+	            return [];
+	        if (remove instanceof Element)
+	            return [remove];
+	        return Array.from(remove);
+	    }
+	    _validateAttributeName(value) {
+	        return ATTRIBUTE_NAME_PATTERN.test(String(value));
+	    }
 	    _validateProperty(value) {
-	        return String(value)
-	            .toLowerCase()
-	            .match(/^([a-z-]{2,})/);
+	        return PROPERTY_NAME_PATTERN.test(String(value));
+	    }
+	    _normalizeProperty(value) {
+	        const property = String(value).trim();
+	        if (property.startsWith('--'))
+	            return property;
+	        return property.replace(/[A-Z]/g, (char) => '-' + char.toLowerCase());
 	    }
 	    _resetStyle($that, property) {
+	        property = this._normalizeProperty(property);
 	        if (this._validateProperty(property)) {
 	            $that.style.setProperty(property, '');
 	            if ($that.getAttribute('style') === '') {

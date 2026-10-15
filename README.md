@@ -19,7 +19,7 @@
 
 See the [module-match-height.js demo](https://codepen.io/mitera/pen/XWGpLRL).
 
-[![module-match-height.js screenshot](https://github.com/mitera/module-match-height/blob/master/module-match-height.jpg)](https://github.com/mitera/module-match-height/archive/refs/heads/master.zip)
+[![module-match-height.js screenshot](https://github.com/mitera/module-match-height/blob/main/module-match-height.jpg)](https://github.com/mitera/module-match-height/archive/refs/heads/main.zip)
 
 ### Modern browsers
 
@@ -48,7 +48,7 @@ CDN via jsDelivr
 
     <script src="https://cdn.jsdelivr.net/npm/module-match-height@latest/dist/module-match-height.min.js" type="text/javascript"></script>
 
-Download [module-match-height.js](https://github.com/mitera/module-match-height/blob/master/module-match-height.js) and include the script in your HTML file:
+Download [module-match-height.js](https://github.com/mitera/module-match-height/blob/main/dist/module-match-height.js) and include the script in your HTML file:
 
 	<script src="module-match-height.js" type="text/javascript"></script>
 
@@ -76,7 +76,7 @@ The above example will set all selected elements with the class `item` to the he
 If the items are on multiple rows, the items of each row will be set to the tallest of that row (see `byRow` option).
 
 Call this on the event (the plugin will automatically update on window load).   
-See the included [test.html](https://github.com/mitera/module-match-height/blob/master/test/test.html) for many working examples.
+See the included [test.html](https://github.com/mitera/module-match-height/blob/main/test/test.html) for many working examples.
 
 Also see the [Data API](#data-api) below for a simple, alternative inline usage.
 
@@ -91,6 +91,8 @@ The default `options` are:
         target: null,
         remove: null,
         attributeName: null,
+        attributeValue: null,
+        dataApi: true,
         events: true,
         throttle: 80,
         beforeUpdate: null,
@@ -105,6 +107,8 @@ Where:
 - `target` is an optional element to use instead of the element with maximum height
 - `remove` is an optional element/s to excluded
 - `attributeName` is an optional for use custom attribute
+- `attributeValue` is an optional value of `attributeName`: only the elements with this value are matched as a single group
+- `dataApi` is `true` or `false` to apply the `data-mh` / `data-match-height` groups; set it to `false` on all but one of the instances sharing the same container, to avoid matching the same groups more than once
 - `events` is `true` or `false` to enable default events
 - `throttle` milliseconds to executed resize event, default is `80`
 - `beforeUpdate` is a custom method that starts before the height matching process
@@ -277,7 +281,7 @@ I suggest to assign element to a variable for not create multiple instances and 
 
 ### Changelog
 
-To see what's new or changed in the latest version, see the [changelog](https://github.com/mitera/module-match-height/blob/master/CHANGELOG.md)
+To see what's new or changed in the latest version, see the [changelog](https://github.com/mitera/module-match-height/blob/main/CHANGELOG.md)
 
 ### License
 

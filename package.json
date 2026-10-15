@@ -6,6 +6,9 @@
   "description": "a module responsive equal heights",
   "main": "dist/module-match-height.js",
   "types": "dist/module-match-height.d.ts",
+  "files": [
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mitera/module-match-height.git"
@@ -31,8 +34,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.5",
-    "esbuild": "^0.28.1",
-    "rollup": "^4.41.1",
+    "rollup": "^4.59.0",
     "terser": "^5.39.2",
     "tslib": "^2.8.1",
     "typescript": "^5.8.3"

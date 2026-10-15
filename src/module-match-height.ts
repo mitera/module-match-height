@@ -1,4 +1,6 @@
-import {Settings} from "types";
+import {Settings} from "./types";
+
+export type {Settings};
 
 type Item = {
     el: HTMLElement;
@@ -6,14 +8,26 @@ type Item = {
     height: number;
 }
 
+// Allowed attribute names: no characters that could alter the generated CSS selector
+const ATTRIBUTE_NAME_PATTERN = /^[a-z][a-z0-9_-]*$/i;
+// Allowed CSS property names, including vendor prefixed and custom properties
+const PROPERTY_NAME_PATTERN = /^-{0,2}[a-z][a-z0-9-]*$/i;
+// Max difference in px between the tops of two elements on the same row
+const ROW_ERROR_THRESHOLD = 1;
+
 export default class MatchHeight {
 
     private wrapEl: HTMLElement;
     private settings: Settings;
-    private update: any;
-    private _remains: Item[] = [];
+    private property: string;
+    private update: () => void;
+    private _ready: () => void;
+    private _throttleTimer: ReturnType<typeof setTimeout> | undefined;
 
     constructor(wrapEl: HTMLElement, settings?: Settings) {
+        if (!wrapEl || typeof wrapEl.querySelectorAll !== 'function') {
+            throw new TypeError('MatchHeight: wrapEl must be a DOM element');
+        }
         this.wrapEl = wrapEl;
 
         // Default settings
@@ -25,27 +39,33 @@ export default class MatchHeight {
             attributeValue: null,
             property: 'height',
             remove: null,
+            dataApi: true,
             events: true,
             throttle: 80,
             beforeUpdate: null,
             afterUpdate: null
         }
 
-        this.settings = {...default_settings, ...settings} as Settings;
+        this.settings = {...default_settings, ...settings};
 
-        if (this.settings.property && !this._validateProperty(this.settings.property)) {
-            this.settings.property = 'height';
-        }
+        const property = this.settings.property ? this._normalizeProperty(this.settings.property) : '';
+        this.property = this._validateProperty(property) ? property : 'height';
+
+        this._ready = this._applyAll.bind(this);
+        this.update = this._ready;
 
         if (this.settings.events) {
-            this.update = this._applyAll.bind(this);
-            if (document.readyState !== 'loading') {
-                this._applyAll();
-            } else {
-                document.addEventListener( 'DOMContentLoaded', this.update, { once: true } );
-            }
             if (this.settings.throttle && this.settings.throttle > 0) {
-                this.update = this._throttle( this.update, this.settings.throttle );
+                this.update = this._throttle(this._ready, this.settings.throttle);
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', this._ready, { once: true });
+            } else {
+                this._applyAll();
+            }
+            // Images and other media change the heights once loaded
+            if (document.readyState !== 'complete') {
+                window.addEventListener('load', this._ready, { once: true });
             }
             this._init();
         }
@@ -61,35 +81,32 @@ export default class MatchHeight {
 
     _unbind() {
 
+        document.removeEventListener('DOMContentLoaded', this._ready);
+
+        window.removeEventListener('load', this._ready);
+
         window.removeEventListener("resize", this.update);
 
         window.removeEventListener("orientationchange", this.update);
+
+        clearTimeout(this._throttleTimer);
     }
 
     _remove() {
-        let elements: HTMLElement[] = []
-        let opts = this.settings;
-        if (opts.elements) {
-            elements = Array.from(this.wrapEl.querySelectorAll(opts.elements));
-        } else {
-            if (opts.attributeName && opts.attributeValue) {
-                elements = Array.from(this.wrapEl.querySelectorAll('[' + opts.attributeName + '="' + opts.attributeValue + '"]'));
-            }
-        }
-        elements.forEach((item) => {
-            if (opts.property) item.style.setProperty(opts.property, '');
-            if (item.getAttribute('style') === '') item.removeAttribute('style');
+        this._getElements().forEach((item) => {
+            this._resetStyle(item, this.property);
         });
     }
 
-    _throttle(fn: Function, threshold: number) {
-        let last: number, deferTimer: any;
-        return function () {
+    _throttle(fn: () => void, threshold: number) {
+        let last = 0;
+        return () => {
             const now = Date.now();
+            clearTimeout(this._throttleTimer);
             if (last && now < last + threshold) {
-                clearTimeout(deferTimer);
-                deferTimer = setTimeout(function () {
-                    last = now;
+                // Trailing call, so the last resize is always applied
+                this._throttleTimer = setTimeout(() => {
+                    last = Date.now();
                     fn();
                 }, threshold);
             }
@@ -101,27 +118,31 @@ export default class MatchHeight {
     }
 
     _applyAll() {
-        if (this.settings && this.settings.beforeUpdate) {
+        if (this.settings.beforeUpdate) {
             this.settings.beforeUpdate();
         }
 
         this._apply();
-        if (this.settings.attributeName && this._validateProperty(this.settings.attributeName)) {
-            this._applyDataApi(this.settings.attributeName);
+        const attributeName = this.settings.attributeName;
+        if (attributeName && this._validateAttributeName(attributeName)
+            && attributeName !== 'data-match-height' && attributeName !== 'data-mh') {
+            this._applyDataApi(attributeName);
         }
-        this._applyDataApi('data-match-height');
-        this._applyDataApi('data-mh');
+        // Disable on instances that share a container, so the default data API groups are matched only once
+        if (this.settings.dataApi) {
+            this._applyDataApi('data-match-height');
+            this._applyDataApi('data-mh');
+        }
 
-        if (this.settings && this.settings.afterUpdate) {
+        if (this.settings.afterUpdate) {
             this.settings.afterUpdate();
         }
     }
 
     _applyDataApi(attributeName: string) {
-        let elements: HTMLElement[] = Array.from(this.wrapEl.querySelectorAll('[' + attributeName + ']'));
-        elements.forEach( ( item ) => {
-            this._resetStyle(item, this.settings.property);
-        } );
+        if (!this._validateAttributeName(attributeName)) return;
+
+        const elements: HTMLElement[] = Array.from(this.wrapEl.querySelectorAll<HTMLElement>('[' + attributeName + ']'));
 
         const groups: Map<string, HTMLElement[]> = new Map();
         elements.forEach((el) => {
@@ -141,105 +162,111 @@ export default class MatchHeight {
     }
 
     _apply() {
-        let opts = this.settings;
-        let elements: HTMLElement[] = []
-        if (opts.elements && opts.elements.trim() != '') {
-            elements = Array.from(this.wrapEl.querySelectorAll(opts.elements));
-        } else {
-            if (opts.attributeName && this._validateProperty(opts.attributeName) && opts.attributeValue && opts.attributeValue.trim() != '') {
-                elements = Array.from(this.wrapEl.querySelectorAll('[' + opts.attributeName + '="' + opts.attributeValue + '"]'));
-            }
-        }
-        this._update(elements);
+        this._update(this._getElements());
     }
 
     _update(elements: HTMLElement[]) {
         if ( elements.length === 0 ) return;
 
-        this._remains = Array.prototype.map.call( elements, ( el: HTMLElement ): Item => {
-
-            return {
-                el,
-                top: 0,
-                height: 0
-            };
-
-        } ) as Item[];
         // remove all height before
-        this._remains.forEach( ( item ) => {
-            this._resetStyle(item.el, this.settings.property);
+        elements.forEach( ( el ) => {
+            this._resetStyle(el, this.property);
         } );
 
-        this._process();
+        const excluded = this._getExcludedElements();
+        const items: Item[] = elements
+            .filter((el) => !excluded.includes(el))
+            // Skip elements that are not rendered (e.g. display: none): their height would be 0
+            .filter((el) => el.getClientRects().length > 0)
+            .map((el): Item => ({ el, top: 0, height: 0 }));
+
+        this._process(items);
     }
 
-    private _process() {
+    private _process(remains: Item[]) {
 
-        this._remains.forEach( ( item ) => {
+        while (remains.length > 0) {
 
-            const bb = item.el.getBoundingClientRect();
+            // Measure again on each row: heights applied to the previous rows can move the next ones
+            remains.forEach( ( item ) => {
 
-            item.top    = this.settings.byRow ? bb.top : 0;
-            item.height = bb.height;
+                const bb = item.el.getBoundingClientRect();
 
-        } );
+                item.top    = this.settings.byRow ? bb.top : 0;
+                item.height = bb.height;
 
-        this._remains.sort( ( a, b ) => a.top - b.top);
+            } );
 
-        const errorThreshold = 1;
-        const processingTop = this._remains[0].top;
-        const processingTargets = this._remains.filter(item => Math.abs(item.top - processingTop) <= errorThreshold);
+            remains.sort( ( a, b ) => a.top - b.top);
 
-        let maxHeightInRow = 0;
-        if (this.settings.target) maxHeightInRow = this.settings.target.getBoundingClientRect().height;
-        else maxHeightInRow = Math.max(...processingTargets.map((item: Item) => item.height));
+            const processingTop = remains[0].top;
+            const processingTargets = remains.filter(item => Math.abs(item.top - processingTop) <= ROW_ERROR_THRESHOLD);
+            remains = remains.slice(processingTargets.length);
 
-        processingTargets.forEach((item: Item) => {
+            // A single item in a row has nothing to match, unless a target is set
+            if (processingTargets.length < 2 && !this.settings.target) continue;
 
-            const styles = window.getComputedStyle(item.el);
-            const isBorderBox = styles.boxSizing === 'border-box';
+            let maxHeightInRow = 0;
+            if (this.settings.target) maxHeightInRow = this.settings.target.getBoundingClientRect().height;
+            else maxHeightInRow = Math.max(...processingTargets.map((item: Item) => item.height));
 
-            if (isBorderBox) {
+            processingTargets.forEach((item: Item) => {
 
-                if (this.settings.property) item.el.style.setProperty(this.settings.property, `${maxHeightInRow}px`);
+                const styles = window.getComputedStyle(item.el);
+                let value = maxHeightInRow;
 
-            } else {
-                const paddingAndBorder =
-                    (parseFloat(styles.paddingTop) || 0) +
-                    (parseFloat(styles.paddingBottom) || 0) +
-                    (parseFloat(styles.borderTopWidth) || 0) +
-                    (parseFloat(styles.borderBottomWidth) || 0);
-                if (this.settings.property) item.el.style.setProperty(this.settings.property, `${maxHeightInRow - paddingAndBorder}px`);
-            }
-
-            if (this.settings.remove) {
-                if (this.settings.remove instanceof NodeList) {
-                    Array.from(this.settings.remove).forEach((el) => {
-                        if (item.el === el && this.settings.property && el instanceof HTMLElement) {
-                            this._resetStyle(el, this.settings.property);
-                        }
-                    });
-                } else if (item.el === this.settings.remove && this.settings.property) {
-                    this._resetStyle(item.el, this.settings.property);
+                if (styles.boxSizing !== 'border-box') {
+                    value -=
+                        (parseFloat(styles.paddingTop) || 0) +
+                        (parseFloat(styles.paddingBottom) || 0) +
+                        (parseFloat(styles.borderTopWidth) || 0) +
+                        (parseFloat(styles.borderBottomWidth) || 0);
                 }
-            }
-        });
 
-        this._remains.splice(0, processingTargets.length);
-        if (0 < this._remains.length) {
-            this._process()
+                item.el.style.setProperty(this.property, `${Math.max(0, value)}px`);
+            });
         }
     }
 
-    _validateProperty(value: string) {
-        return String(value)
-            .toLowerCase()
-            .match(
-                /^([a-z-]{2,})/
-            );
+    private _getElements(): HTMLElement[] {
+        const opts = this.settings;
+        if (opts.elements && opts.elements.trim() !== '') {
+            return Array.from(this.wrapEl.querySelectorAll<HTMLElement>(opts.elements));
+        }
+        if (opts.attributeName && this._validateAttributeName(opts.attributeName) && opts.attributeValue && opts.attributeValue.trim() !== '') {
+            const attributeName = opts.attributeName;
+            const attributeValue = opts.attributeValue;
+            // Compare the value in JS instead of building a selector with it, so it needs no escaping
+            return Array.from(this.wrapEl.querySelectorAll<HTMLElement>('[' + attributeName + ']'))
+                .filter((el) => el.getAttribute(attributeName) === attributeValue);
+        }
+        return [];
+    }
+
+    private _getExcludedElements(): Element[] {
+        const remove = this.settings.remove;
+        if (!remove) return [];
+        if (remove instanceof Element) return [remove];
+        return Array.from(remove);
+    }
+
+    private _validateAttributeName(value: string): boolean {
+        return ATTRIBUTE_NAME_PATTERN.test(String(value));
+    }
+
+    _validateProperty(value: string): boolean {
+        return PROPERTY_NAME_PATTERN.test(String(value));
+    }
+
+    // style.setProperty() silently ignores camelCase names (e.g. minHeight), so convert them to kebab-case
+    private _normalizeProperty(value: string): string {
+        const property = String(value).trim();
+        if (property.startsWith('--')) return property;
+        return property.replace(/[A-Z]/g, (char) => '-' + char.toLowerCase());
     }
 
     _resetStyle($that: HTMLElement, property: string) {
+        property = this._normalizeProperty(property);
         if (this._validateProperty(property)) {
             $that.style.setProperty(property, '');
             if ($that.getAttribute('style') === '') {
